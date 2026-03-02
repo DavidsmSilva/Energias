@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empresa Energía</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; display: flex; min-height: 100vh; background: #f5f5f5; }
+    
+    /* Sidebar - empresas-panel */
+    .empresas-panel {
+      width: 280px;
+      background: #1B5E20;
+      padding: 20px;
+      box-sizing: border-box;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .panel-header h2 { color: white; margin: 0; font-size: 18px; }
+    .btn-add { background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 4px; cursor: pointer; font-size: 18px; }
+    .btn-add:hover { background: rgba(255,255,255,0.3); }
+    
+    /* Formulario crear empresa */
+    .form-crear { background: white; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
+    .form-crear input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
+    .form-botones { display: flex; gap: 8px; }
+    .btn-crear { flex: 1; background: #4CAF50; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .btn-cancelar { flex: 1; background: #ddd; color: #333; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+
+    /* Empresas list */
+    .empresas-list { display: flex; flex-direction: column; gap: 4px; }
+    .empresa-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .empresa-item:hover { background: rgba(255,255,255,0.1); }
+    .empresa-item.active { background: rgba(255,255,255,0.2); }
+    .empresa-icon { font-size: 16px; }
+    .empresa-nombre { color: white; font-size: 14px; flex: 1; }
+    .menu-dots { background: none; border: none; color: white; cursor: pointer; font-size: 18px; padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-left: auto; }
+    .menu-dots:hover { background: rgba(255,255,255,0.2); }
+    
+    /* Dropdown */
+    .dropdown { position: absolute; right: 8px; top: 100%; background: #fff; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); min-width: 150px; z-index: 1000; display: none; }
+    .dropdown.show { display: block; }
+    .dropdown-item { padding: 10px 14px; color: #333; font-size: 14px; cursor: pointer; }
+    .dropdown-item:hover { background: #f5f5f5; }
+
+    .panel-nav { display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; }
+    .nav-item { color: rgba(255,255,255,0.9); text-decoration: none; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(255,255,255,0.2); }
+
+    /* Main Content */
+    .main { flex: 1; display: flex; flex-direction: column; margin-left: 280px; width: calc(100% - 280px); box-sizing: border-box; }
+    .content { padding: 24px; background: #f5f5f5; flex: 1; min-height: calc(100vh - 60px); box-sizing: border-box; }
+    
+    /* Header */
+    .header { background: #4CAF50; padding: 12px 24px; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 20px; font-weight: 500; }
+
+    /* Dashboard - Resumen */
+    .resumen-todas h2 { margin: 0 0 20px; color: #333; font-size: 20px; }
+    .btn-volver { background: #1B5E20; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px; }
+    .resumen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .empresa-card { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; }
+    .empresa-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    .empresa-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .empresa-card-header .empresa-icon { font-size: 24px; }
+    .empresa-card-header h3 { margin: 0; font-size: 16px; color: #333; }
+    .empresa-card-body { display: flex; flex-direction: column; gap: 8px; }
+    .stat { display: flex; justify-content: space-between; align-items: center; }
+    .stat-label { font-size: 13px; color: #666; }
+    .stat-value { font-size: 14px; font-weight: 600; color: #333; }
+    .stat.total { border-top: 1px solid #eee; padding-top: 8px; margin-top: 4px; }
+    .stat.total .stat-value { color: #4CAF50; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab { padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .tab:hover { background: #f5f5f5; }
+    .tab.active { background: #4CAF50; color: white; border-color: #4CAF50; }
+
+    /* Filter */
+    .filter-tipo { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .filter-tipo label { font-size: 14px; color: #666; }
+    .filter-tipo select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; min-width: 250px; }
+
+    /* Table */
+    .table-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; margin-bottom: 20px; }
+    .tabla-datos { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tabla-datos th { background: #4CAF50; color: white; padding: 12px; text-align: left; font-weight: 600; white-space: nowrap; }
+    .tabla-datos td { padding: 10px 12px; border-bottom: 1px solid #eee; color: #333; }
+    .tabla-datos tr:hover { background: #f9f9f9; }
+    .empresa-cell { font-weight: 600; background: #f5f5f5; }
+    .empresa-separator td { border-top: 3px solid #1B5E20; }
+    .sin-datos { text-align: center; color: #999; padding: 20px; }
+    .fila-clickable { cursor: pointer; }
+    .fila-clickable:hover { background: #f5f5f5; }
+    
+    /* Tabla Consumo - Azul */
+    .tabla-consumo .tabla-datos th { background: #2196F3; }
+    .tabla-consumo .empresa-separator td { border-top-color: #2196F3; }
+    .tabla-consumo .tab.active { background: #2196F3; border-color: #2196F3; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal-content { background: white; border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; display: flex; flex-direction: column; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #eee; }
+    .modal-header h2 { margin: 0; font-size: 18px; color: #333; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 0; line-height: 1; }
+    .modal-close:hover { color: #333; }
+    .modal-body { padding: 20px; overflow: auto; }
+    .detalle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .detalle-item { padding: 8px; background: #f9f9f9; border-radius: 4px; font-size: 14px; }
+    .detalle-item strong { color: #333; }
+
+    /* Forms */
+    .form-section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .form-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #333; }
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; color: #666; }
+    .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #4CAF50; }
+    .btn-guardar { background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 16px; }
+    .btn-guardar:hover { background: #45a049; }
+
+    /* Page Sections */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Filters */
+    .filters { display: flex; gap: 12px; margin-bottom: 20px; }
+    .filter-group { display: flex; align-items: center; gap: 8px; }
+    .filter-group label { font-size: 14px; color: #666; }
+    .filter-select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white; min-width: 350px; }
+
+    @media (max-width: 1024px) {
+      .empresas-panel { width: 240px; }
+      .main { margin-left: 240px; width: calc(100% - 240px); }
+    }
+
+    @media (max-width: 768px) {
+      .empresas-panel { width: 200px; padding: 15px; }
+      .main { margin-left: 200px; width: calc(100% - 200px); }
+      .content { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="empresas-panel">
+    <div class="panel-header">
+      <h2>INICIO</h2>
+    </div>
+    
+    <nav class="panel-nav">
+      <a href="#" class="nav-item active" onclick="showPage('dashboard')">🏠 Inicio</a>
+      <a href="#" class="nav-item" onclick="showPage('ajustes')">⚙️ Ajustes</a>
+    </nav>
+
+    <div class="panel-header empresas-header">
+      <h2>EMPRESAS</h2>
+      <button class="btn-add" onclick="toggleFormulario()">+</button>
+    </div>
+    
+    <!-- Formulario crear empresa -->
+    <div class="form-crear" id="formCrear" style="display: none;">
+      <input type="text" id="nombreEmpresa" placeholder="Nombre de la empresa" class="input-nombre">
+      <input type="email" id="correoEmpresa" placeholder="Correo electrónico" class="input-email">
+      <div class="form-botones">
+        <button class="btn-crear" onclick="guardarEmpresa()">Crear</button>
+        <button class="btn-cancelar" onclick="cancelar()">Cancelar</button>
+      </div>
+    </div>
+    
+    <div class="empresas-list">
+      <div class="empresa-item active">
+        <span class="empresa-icon">🔥</span>
+        <span class="empresa-nombre">EcoEnergy</span>
+        <button class="menu-dots" onclick="toggleDropdown(this)">⋮</button>
+        <div class="dropdown">
+          <div class="dropdown-item" onclick="showPage('inventario')">📦 Inventario</div>
+          <div class="dropdown-item" onclick="showPage('consumo')">⚡ Consumo</div>
+        </div>
+      </div>
+      <div class="empresa-item">
+        <span class="empresa-icon">⚡</span>
+        <span class="empresa-nombre">GasNatural SA</span>
+        <button class="menu-dots" onclick="toggleDropdown(this)">⋮</button>
+        <div class="dropdown">
+          <div class="dropdown-item" onclick="showPage('inventario')">📦 Inventario</div>
+          <div class="dropdown-item" onclick="showPage('consumo')">⚡ Consumo</div>
+        </div>
+      </div>
+      <div class="empresa-item">
+        <span class="empresa-icon">🏭</span>
+        <span class="empresa-nombre">PowerGreen</span>
+        <button class="menu-dots" onclick="toggleDropdown(this)">⋮</button>
+        <div class="dropdown">
+          <div class="dropdown-item" onclick="showPage('inventario')">📦 Inventario</div>
+          <div class="dropdown-item" onclick="showPage('consumo')">⚡ Consumo</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <h1 id="pageTitle">Inicio</h1>
+    </header>
+
+    <div class="content">
+      <!-- Dashboard Page -->
+      <div id="dashboard" class="page active">
+        <div class="resumen-todas">
+          <h2>Resumen de Todas las Empresas</h2>
+          
+          <div class="resumen-grid">
+            <div class="empresa-card" onclick="seleccionarEmpresa('EcoEnergy')">
+              <div class="empresa-card-header">
+                <span class="empresa-icon">🔥</span>
+                <h3>EcoEnergy</h3>
+              </div>
+              <div class="empresa-card-body">
+                <div class="stat">
+                  <span class="stat-label">📦 Inventario</span>
+                  <span class="stat-value">4</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">⚡ Consumo</span>
+                  <span class="stat-value">2</span>
+                </div>
+                <div class="stat total">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value">6</span>
+                </div>
+              </div>
+            </div>
+            <div class="empresa-card" onclick="seleccionarEmpresa('GasNatural SA')">
+              <div class="empresa-card-header">
+                <span class="empresa-icon">⚡</span>
+                <h3>GasNatural SA</h3>
+              </div>
+              <div class="empresa-card-body">
+                <div class="stat">
+                  <span class="stat-label">📦 Inventario</span>
+                  <span class="stat-value">3</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">⚡ Consumo</span>
+                  <span class="stat-value">1</span>
+                </div>
+                <div class="stat total">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value">4</span>
+                </div>
+              </div>
+            </div>
+            <div class="empresa-card" onclick="seleccionarEmpresa('PowerGreen')">
+              <div class="empresa-card-header">
+                <span class="empresa-icon">🏭</span>
+                <h3>PowerGreen</h3>
+              </div>
+              <div class="empresa-card-body">
+                <div class="stat">
+                  <span class="stat-label">📦 Inventario</span>
+                  <span class="stat-value">2</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">⚡ Consumo</span>
+                  <span class="stat-value">0</span>
+                </div>
+                <div class="stat total">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalle de empresa seleccionada -->
+          <div id="detalleEmpresa" style="display: none;">
+            <button class="btn-volver" onclick="volverTodas()">← Ver todas las empresas</button>
+            
+            <div class="tabs">
+              <button class="tab active" onclick="setTab('inventario')">📦 Inventario</button>
+              <button class="tab" onclick="setTab('consumo')">⚡ Consumo</button>
+            </div>
+
+            <!-- Filtro por tipo -->
+            <div class="filter-tipo" id="filtroTipoInventario">
+              <label>Filtrar por tipo:</label>
+              <select>
+                <option value="">Todos</option>
+                <option value="electrica">Energía eléctrica del servicio público</option>
+                <option value="renovable">Energías renovables</option>
+                <option value="combustibles">Energía a partir de combustibles</option>
+                <option value="biomasa_electrica">Biomasa para energía eléctrica</option>
+                <option value="biomasa_calor">Biomasa para generar calor</option>
+              </select>
+            </div>
+
+            <div class="filter-tipo" id="filtroTipoConsumo" style="display: none;">
+              <label>Filtrar por tipo:</label>
+              <select>
+                <option value="">Todos</option>
+                <option value="gas_electrica">Gas para energía eléctrica</option>
+                <option value="gas_calor">Gas para generar calor</option>
+                <option value="vendida">Energía Vendida</option>
+                <option value="recibida">Energía Recibida</option>
+                <option value="cedida">Energía Cedida</option>
+              </select>
+            </div>
+
+            <!-- Tabla Inventario -->
+            <div class="table-container" id="tablaInventario">
+              <table class="tabla-datos">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="fila-clickable" onclick="abrirModal('inventario')">
+                    <td>Energía eléctrica del servicio público</td>
+                    <td>Enero / 2026</td>
+                  </tr>
+                  <tr class="fila-clickable" onclick="abrirModal('inventario')">
+                    <td>Energías renovables</td>
+                    <td>Febrero / 2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Tabla Consumo -->
+            <div class="table-container tabla-consumo" id="tablaConsumo" style="display: none;">
+              <table class="tabla-datos">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="fila-clickable" onclick="abrirModal('consumo')">
+                    <td>Gas para energía eléctrica</td>
+                    <td>Enero / 2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventario Page -->
+      <div id="inventario" class="page">
+        <div class="filters">
+          <div class="filter-group">
+            <label>Tipo de energía:</label>
+            <select class="filter-select">
+              <option>Energía eléctrica del servicio público</option>
+              <option>Energías renovables</option>
+              <option>Energía a partir de combustibles</option>
+              <option>Biomasa para energía eléctrica</option>
+              <option>Biomasa para generar calor</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="form-section">
+          <div class="form-title">Energía eléctrica del servicio público</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Mes</label>
+              <select>
+                <option>Enero</option><option>Febrero</option><option>Marzo</option>
+                <option>Abril</option><option>Mayo</option><option>Junio</option>
+                <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+                <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Año</label>
+              <select>
+                <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cantidad Consumida</label>
+              <input type="number" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Número de Meses</label>
+              <input type="number" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Costo Total al Mes ($)</label>
+              <input type="number" placeholder="0.00">
+            </div>
+          </div>
+          <button class="btn-guardar">Guardar</button>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-container">
+          <table class="tabla-datos">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Cantidad</th>
+                <th>N° Meses</th>
+                <th>Costo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Energía eléctrica del servicio público</td>
+                <td>Enero / 2026</td>
+                <td>1500</td>
+                <td>1</td>
+                <td>$1,200,000</td>
+              </tr>
+              <tr>
+                <td>Energías renovables</td>
+                <td>Febrero / 2026</td>
+                <td>800</td>
+                <td>1</td>
+                <td>$640,000</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Consumo Page -->
+      <div id="consumo" class="page">
+        <div class="filters">
+          <div class="filter-group">
+            <label>Tipo de energía:</label>
+            <select class="filter-select">
+              <option>Gas para energía eléctrica</option>
+              <option>Gas para generar calor</option>
+              <option>Energía Vendida</option>
+              <option>Energía Recibida</option>
+              <option>Energía Cedida</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="form-section">
+          <div class="form-title">Gas para energía eléctrica</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Mes</label>
+              <select>
+                <option>Enero</option><option>Febrero</option><option>Marzo</option>
+                <option>Abril</option><option>Mayo</option><option>Junio</option>
+                <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+                <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Año</label>
+              <select>
+                <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de Gas</label>
+              <select>
+                <option>Gas Natural</option><option>GLP</option><option>Gas de Biogás</option>
+                <option>Gas de Coal</option><option>Gas Licuado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cantidad de Gas</label>
+              <input type="number" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Poder Calorífico</label>
+              <input type="number" placeholder="0.00">
+            </div>
+          </div>
+          <button class="btn-guardar">Guardar</button>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-container tabla-consumo">
+          <table class="tabla-datos">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Gas para energía eléctrica</td>
+                <td>Enero / 2026</td>
+                <td>500 kWh</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Ajustes Page -->
+      <div id="ajustes" class="page">
+        <div class="table-container">
+          <table class="tabla-datos">
+            <tbody>
+              <tr>
+                <td style="width: 200px;"><strong>Nombre</strong></td>
+                <td>EcoEnergy S.A.S</td>
+              </tr>
+              <tr>
+                <td><strong>NIT</strong></td>
+                <td>900.123.456-7</td>
+              </tr>
+              <tr>
+                <td><strong>Dirección</strong></td>
+                <td>Calle 123 #45-67, Bogotá</td>
+              </tr>
+              <tr>
+                <td><strong>Tarifa/kWh</strong></td>
+                <td>$0.28</td>
+              </tr>
+              <tr>
+                <td><strong>Moneda</strong></td>
+                <td>COP - Peso Colombiano</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalDetalle" onclick="cerrarModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="modalTitulo">Detalle</h2>
+        <button class="modal-close" onclick="cerrarModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalCuerpo">
+        <!-- Se llena dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let empresaSeleccionada = null;
+    let tabActual = 'inventario';
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(m => m.classList.remove('active'));
+      
+      document.getElementById(pageId).classList.add('active');
+      
+      const navItems = document.querySelectorAll('.nav-item');
+      if (pageId === 'dashboard') navItems[0].classList.add('active');
+      if (pageId === 'ajustes') navItems[1].classList.add('active');
+      
+      const titles = {
+        'dashboard': 'Inicio',
+        'inventario': 'Inventario',
+        'consumo': 'Consumo',
+        'ajustes': 'Ajustes'
+      };
+      if (empresaSeleccionada) {
+        titles['inventario'] = 'Inventario - ' + empresaSeleccionada;
+        titles['consumo'] = 'Consumo - ' + empresaSeleccionada;
+      }
+      document.getElementById('pageTitle').textContent = titles[pageId];
+      
+      event.preventDefault();
+    }
+
+    function toggleFormulario() {
+      const form = document.getElementById('formCrear');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleDropdown(btn) {
+      const dropdown = btn.nextElementSibling;
+      dropdown.classList.toggle('show');
+      event.stopPropagation();
+    }
+
+    function seleccionarEmpresa(nombre) {
+      empresaSeleccionada = nombre;
+      document.getElementById('detalleEmpresa').style.display = 'block';
+      document.querySelector('.resumen-todas h2').textContent = 'Resumen de ' + nombre;
+    }
+
+    function volverTodas() {
+      empresaSeleccionada = null;
+      document.getElementById('detalleEmpresa').style.display = 'none';
+      document.querySelector('.resumen-todas h2').textContent = 'Resumen de Todas las Empresas';
+    }
+
+    function setTab(tab) {
+      tabActual = tab;
+      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (tab === 'inventario') {
+        document.getElementById('tablaInventario').style.display = 'block';
+        document.getElementById('tablaConsumo').style.display = 'none';
+        document.getElementById('filtroTipoInventario').style.display = 'flex';
+        document.getElementById('filtroTipoConsumo').style.display = 'none';
+      } else {
+        document.getElementById('tablaInventario').style.display = 'none';
+        document.getElementById('tablaConsumo').style.display = 'block';
+        document.getElementById('filtroTipoInventario').style.display = 'none';
+        document.getElementById('filtroTipoConsumo').style.display = 'flex';
+      }
+    }
+
+    function abrirModal(tipo) {
+      const modal = document.getElementById('modalDetalle');
+      const titulo = document.getElementById('modalTitulo');
+      const cuerpo = document.getElementById('modalCuerpo');
+      
+      titulo.textContent = tipo === 'inventario' ? 'Inventario' : 'Consumo';
+      
+      if (tipo === 'inventario') {
+        cuerpo.innerHTML = `
+          <div class="detalle-grid">
+            <div class="detalle-item"><strong>Tipo:</strong> Energía eléctrica del servicio público</div>
+            <div class="detalle-item"><strong>Fecha:</strong> Enero / 2026</div>
+            <div class="detalle-item"><strong>Cantidad:</strong> 1500</div>
+            <div class="detalle-item"><strong>N° Meses:</strong> 1</div>
+            <div class="detalle-item"><strong>Costo:</strong> $1,200,000</div>
+          </div>
+        `;
+      } else {
+        cuerpo.innerHTML = `
+          <div class="detalle-grid">
+            <div class="detalle-item"><strong>Tipo:</strong> Gas para energía eléctrica</div>
+            <div class="detalle-item"><strong>Fecha:</strong> Enero / 2026</div>
+            <div class="detalle-item"><strong>Tipo de Gas:</strong> Gas Natural</div>
+            <div class="detalle-item"><strong>Cantidad de Gas:</strong> 100</div>
+            <div class="detalle-item"><strong>Poder Calorífico:</strong> 45 kJ/unidad</div>
+          </div>
+        `;
+      }
+      
+      modal.classList.add('show');
+    }
+
+    function cerrarModal(event) {
+      if (!event || event.target === document.getElementById('modalDetalle') || event.target.classList.contains('modal-close')) {
+        document.getElementById('modalDetalle').classList.remove('show');
+      }
+    }
+
+    function guardarEmpresa() {
+      const nombre = document.getElementById('nombreEmpresa').value;
+      const correo = document.getElementById('correoEmpresa').value;
+      if (nombre && correo) {
+        alert('Empresa creada: ' + nombre);
+        document.getElementById('nombreEmpresa').value = '';
+        document.getElementById('correoEmpresa').value = '';
+        document.getElementById('formCrear').style.display = 'none';
+      }
+    }
+
+    function cancelar() {
+      document.getElementById('nombreEmpresa').value = '';
+      document.getElementById('correoEmpresa').value = '';
+      document.getElementById('formCrear').style.display = 'none';
+    }
+
+    // Cerrar dropdowns al hacer clic fuera
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('show'));
+    });
+  </script>
+</body>
+</html>

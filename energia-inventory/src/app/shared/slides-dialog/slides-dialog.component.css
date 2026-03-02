@@ -1,0 +1,3 @@
+.slides { display: flex; overflow: hidden; height: 180px; align-items: center; justify-content: center; }
+.slide { min-width: 100%; opacity: 0; transform: translateX(100%); transition: transform .4s ease, opacity .4s ease; }
+.slide.active { opacity: 1; transform: translateX(0); }

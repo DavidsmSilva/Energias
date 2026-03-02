@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.angular/
+.cache/
+.vscode/
+.DS_Store
+coverage/
+tmp/
+*.log

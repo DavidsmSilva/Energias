@@ -1,0 +1,20 @@
+<div class="app-container">
+  <aside class="empresas-panel">
+    <div class="panel-header">
+      <h2>INICIO</h2>
+    </div>
+    
+    <nav class="panel-nav">
+      <a class="nav-item" [class.active]="rutaActual === '/'" (click)="irAInicio()">🏠 Inicio</a>
+      <a class="nav-item" [class.active]="rutaActual === '/empresas'" (click)="irAEmpresas()">🏢 Empresas</a>
+      <a class="nav-item" [class.active]="rutaActual === '/ajustes'" (click)="irAAjustes()">⚙️ Ajustes</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <app-header [pageTitle]="pageTitle"></app-header>
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

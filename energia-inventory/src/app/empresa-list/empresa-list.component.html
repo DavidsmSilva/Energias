@@ -1,0 +1,11 @@
+<section class="left-panel">
+  <div class="title">EMPRESA</div>
+  <div class="empresa-list">
+    <div class="empresa-item" *ngFor="let e of empresas">
+      <span class="empresa-name">{{ e.nombre }}</span>
+      <button mat-icon-button (click)="openSlides(e)" aria-label="Abrir diapositivas">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </div>
+  </div>
+</section>

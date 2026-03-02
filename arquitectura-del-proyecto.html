@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Arquitectura del Proyecto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    h1 { color: #1B5E20; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+    h2 { color: #2E7D32; margin-top: 30px; }
+    code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
+    ul { list-style-type: square; }
+    li { margin-bottom: 8px; }
+    .section { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .feature { background: #e8f5e9; padding: 10px; border-left: 4px solid #4CAF50; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Arquitectura del Proyecto - Energia Inventory</h1>
+  <p>Este documento describe la estructura, frameworks y tecnologías utilizadas en el proyecto.</p>
+
+  <div class="section">
+    <h2>Frameworks y Tecnologías</h2>
+    <ul>
+      <li><strong>Angular 15</strong> - Framework principal para el frontend</li>
+      <li><strong>TypeScript</strong> - Lenguaje de programación</li>
+      <li><strong>Angular Material</strong> - Biblioteca de componentes UI</li>
+      <li><strong>RxJS</strong> - Programación reactiva para manejo de observables</li>
+      <li><strong>HTML5/CSS3</strong> - Estructura y estilos</li>
+      <li><strong>Node.js</strong> - Entorno de ejecución</li>
+      <li><strong>npm</strong> - Gestor de paquetes</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Estructura del Proyecto</h2>
+    <ul>
+      <li><code>src/app/</code> - Código principal de la aplicación</li>
+      <li><code>src/app/components/</code> - Componentes reutilizables (header)</li>
+      <li><code>src/app/pages/</code> - Páginas principales (dashboard, inventario, consumo, ajustes)</li>
+      <li><code>src/app/services/</code> - Servicios para gestión de datos</li>
+      <li><code>src/app/shared/</code> - Componentes compartidos</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Componentes Principales</h2>
+    <ul>
+      <li><strong>AppComponent</strong> - Componente raíz de la aplicación con menú lateral</li>
+      <li><strong>HeaderComponent</strong> - Barra de encabezado con título dinámico</li>
+      <li><strong>DashboardComponent</strong> - Página de inicio con resumen de empresas</li>
+      <li><strong>InventarioComponent</strong> - Gestión de inventario por empresa</li>
+      <li><strong>ConsumoComponent</strong> - Gestión de consumo por empresa</li>
+      <li><strong>AjustesComponent</strong> - Página de ajustes</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Servicios</h2>
+    <ul>
+      <li><strong>EmpresaService</strong> - Gestión de empresas (listado, selección, agregar)</li>
+      <li><strong>DatosService</strong> - Manejo de datos de inventario y consumo</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Funcionalidades Principales</h2>
+    
+    <h3>Menú Lateral (AppComponent)</h3>
+    <ul>
+      <li>Navegación: Inicio, Ajustes</li>
+      <li>Gestión de Empresas:
+        <ul>
+          <li>Listado de empresas con icono, nombre y menú dropdown (⋮)</li>
+          <li>Botón "+" para agregar nueva empresa (nombre y correo)</li>
+          <li>Dropdown con opciones: Inventario, Consumo</li>
+        </ul>
+      </li>
+      <li>Selección de empresa navegando a /inventario/:id o /consumo/:id</li>
+    </ul>
+
+    <h3>Página de Inicio (Dashboard)</h3>
+    <ul>
+      <li>Vista de resumen de todas las empresas (tarjetas con contadores)</li>
+      <li>Al hacer clic en una empresa:
+        <ul>
+          <li>Se filtran las tablas para mostrar solo esa empresa</li>
+          <li>Se muestran tabs: Inventario | Consumo</li>
+          <li>Tablas con solo Tipo y Fecha</li>
+          <li>Dropdown para filtrar por tipo de energía específico</li>
+          <li>Al hacer clic en una fila se abre modal con detalles completos</li>
+        </ul>
+      </li>
+      <li>Modal de detalle muestra solo los campos del formulario seleccionado (no campos vacíos)</li>
+    </ul>
+
+    <h3>Inventario y Consumo</h3>
+    <ul>
+      <li>Sin empresa seleccionada: Tabla con todos los registros de todas las empresas</li>
+      <li>Con empresa seleccionada (/inventario/:id o /consumo/:id): Formulario + tabla de esa empresa</li>
+      <li>Formulario primero, tabla debajo</li>
+      <li>Inventario: tabla verde | Consumo: tabla azul</li>
+    </ul>
+
+    <h3>Tipos de Formularios</h3>
+    <ul>
+      <li><strong>Inventario:</strong>
+        <ul>
+          <li>Energía eléctrica del servicio público</li>
+          <li>Energías renovables</li>
+          <li>Energía a partir de combustibles</li>
+          <li>Biomasa para energía eléctrica</li>
+          <li>Biomasa para generar calor</li>
+        </ul>
+      </li>
+      <li><strong>Consumo:</strong>
+        <ul>
+          <li>Gas para energía eléctrica</li>
+          <li>Gas para generar calor</li>
+          <li>Energía Vendida</li>
+          <li>Energía Recibida</li>
+          <li>Energía Cedida</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Rutas</h2>
+    <ul>
+      <li><code>/</code> - Dashboard (Inicio)</li>
+      <li><code>/inventario</code> - Inventario de todas las empresas</li>
+      <li><code>/inventario/:empresaId</code> - Inventario de una empresa específica</li>
+      <li><code>/consumo</code> - Consumo de todas las empresas</li>
+      <li><code>/consumo/:empresaId</code> - Consumo de una empresa específica</li>
+      <li><code>/ajustes</code> - Página de ajustes</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Comandos para Ejecutar el Proyecto</h2>
+    <ul>
+      <li><code>npm install</code> - Instalar dependencias</li>
+      <li><code>npm start</code> - Iniciar servidor de desarrollo (puerto 4200)</li>
+      <li><code>ng serve --port [puerto]</code> - Iniciar en puerto específico</li>
+      <li><code>npm run build</code> - Construir para producción</li>
+    </ul>
+  </div>
+</body>
+</html>
