@@ -22,7 +22,7 @@
   <div class="section">
     <h2>Frameworks y Tecnologías</h2>
     <ul>
-      <li><strong>Angular 15</strong> - Framework principal para el frontend</li>
+      <li><strong>Angular 17</strong> - Framework principal para el frontend</li>
       <li><strong>TypeScript</strong> - Lenguaje de programación</li>
       <li><strong>Angular Material</strong> - Biblioteca de componentes UI</li>
       <li><strong>RxJS</strong> - Programación reactiva para manejo de observables</li>
@@ -40,18 +40,22 @@
       <li><code>src/app/pages/</code> - Páginas principales (dashboard, inventario, consumo, ajustes)</li>
       <li><code>src/app/services/</code> - Servicios para gestión de datos</li>
       <li><code>src/app/shared/</code> - Componentes compartidos</li>
+      <li><code>src/app/models/</code> - Modelos de datos</li>
+      <li><code>src/app/empresa-list/</code> - Componente de lista de empresas</li>
     </ul>
   </div>
 
   <div class="section">
     <h2>Componentes Principales</h2>
     <ul>
-      <li><strong>AppComponent</strong> - Componente raíz de la aplicación con menú lateral</li>
+      <li><strong>AppComponent</strong> - Componente raíz de la aplicación con menú lateral (standalone)</li>
       <li><strong>HeaderComponent</strong> - Barra de encabezado con título dinámico</li>
-      <li><strong>DashboardComponent</strong> - Página de inicio con resumen de empresas</li>
+      <li><strong>DashboardComponent</strong> - Página de inicio (Energía) con panel de empresas y resumen</li>
       <li><strong>InventarioComponent</strong> - Gestión de inventario por empresa</li>
       <li><strong>ConsumoComponent</strong> - Gestión de consumo por empresa</li>
       <li><strong>AjustesComponent</strong> - Página de ajustes</li>
+      <li><strong>EmpresaListComponent</strong> - Componente de lista de empresas</li>
+      <li><strong>SlidesDialogComponent</strong> - Diálogo para diapositivas</li>
     </ul>
   </div>
 
@@ -63,31 +67,42 @@
     </ul>
   </div>
 
+  <div class class="section">
+    <h2>Modelos de Datos</h2>
+    <ul>
+      <li><strong>Empresa</strong> - id, nombre</li>
+      <li><strong>RegistroInventario</strong> - Tipos: electrica, renovable, combustibles, biomasa_electrica, biomasa_calor</li>
+      <li><strong>RegistroConsumo</strong> - Tipos: gas_electrica, gas_calor, vendida, recibida, cedida</li>
+    </ul>
+  </div>
+
   <div class="section">
     <h2>Funcionalidades Principales</h2>
     
     <h3>Menú Lateral (AppComponent)</h3>
     <ul>
-      <li>Navegación: Inicio, Ajustes</li>
-      <li>Gestión de Empresas:
-        <ul>
-          <li>Listado de empresas con icono, nombre y menú dropdown (⋮)</li>
-          <li>Botón "+" para agregar nueva empresa (nombre y correo)</li>
-          <li>Dropdown con opciones: Inventario, Consumo</li>
-        </ul>
-      </li>
-      <li>Selección de empresa navegando a /inventario/:id o /consumo/:id</li>
+      <li>Navegación: Energia (🏠), Ajustes (⚙️)</li>
+      <li>Encabezado: ENERGÍA</li>
     </ul>
 
-    <h3>Página de Inicio (Dashboard)</h3>
+    <h3>Página de Energía (Dashboard)</h3>
+    <div class="feature">
+      <strong>Panel de Empresas:</strong>
+      <ul>
+        <li>Encabezado verde con título "Empresas" (🏢) y botón "+" para agregar</li>
+        <li>Formulario para crear empresa (solo nombre)</li>
+        <li>Lista de empresas con icono, nombre y menú de 3 puntitos (⋮)</li>
+        <li>Dropdown con opciones: Inventario, Consumo</li>
+      </ul>
+    </div>
     <ul>
       <li>Vista de resumen de todas las empresas (tarjetas con contadores)</li>
       <li>Al hacer clic en una empresa:
         <ul>
           <li>Se filtran las tablas para mostrar solo esa empresa</li>
           <li>Se muestran tabs: Inventario | Consumo</li>
-          <li>Tablas con solo Tipo y Fecha</li>
-          <li>Dropdown para filtrar por tipo de energía específico</li>
+          <li>Tablas con Tipo y Fecha</li>
+          <li>Dropdown para filtrar por tipo de energía específico (sin opción "Todos")</li>
           <li>Al hacer clic en una fila se abre modal con detalles completos</li>
         </ul>
       </li>
@@ -128,7 +143,7 @@
   <div class="section">
     <h2>Rutas</h2>
     <ul>
-      <li><code>/</code> - Dashboard (Inicio)</li>
+      <li><code>/</code> - Dashboard (Inicio - Energía)</li>
       <li><code>/inventario</code> - Inventario de todas las empresas</li>
       <li><code>/inventario/:empresaId</code> - Inventario de una empresa específica</li>
       <li><code>/consumo</code> - Consumo de todas las empresas</li>
@@ -144,6 +159,16 @@
       <li><code>npm start</code> - Iniciar servidor de desarrollo (puerto 4200)</li>
       <li><code>ng serve --port [puerto]</code> - Iniciar en puerto específico</li>
       <li><code>npm run build</code> - Construir para producción</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Notas del Desarrollador</h2>
+    <ul>
+      <li>AppComponent es standalone (Angular 17+)</li>
+      <li>Los filtros de tipo en el resumen de empresas no tienen opción "Todos" - siempre hay un tipo seleccionado</li>
+      <li>El panel de empresas está integrado en la página de Energía (Dashboard)</li>
+      <li>Los modales muestran solo los campos que tienen valor registrado</li>
     </ul>
   </div>
 </body>

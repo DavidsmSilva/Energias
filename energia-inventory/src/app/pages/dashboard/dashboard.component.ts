@@ -16,9 +16,38 @@ interface Empresa {
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="dashboard">
-      <div class="header-botones">
-        <button class="btn-empresas" routerLink="/empresas">🏢 Empresas</button>
+      <div class="empresas-panel-main">
+        <div class="empresas-header">
+          <div class="empresas-title">
+            <span class="empresas-icon">🏢</span>
+            <span>Empresas</span>
+          </div>
+          <button class="btn-add" (click)="mostrarFormulario()" aria-label="Agregar empresa">+</button>
+        </div>
+
+        <div class="form-crear" *ngIf="mostrandoFormulario">
+          <input type="text" [(ngModel)]="nuevaEmpresa.nombre" placeholder="Nombre de empresa">
+          <div class="form-botones">
+            <button class="btn-crear" (click)="guardarEmpresa()">Crear</button>
+            <button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+          </div>
+        </div>
+
+        <div class="empresas-list">
+          <div class="empresa-item" *ngFor="let emp of empresas">
+            <span class="empresa-icon">{{ getIcono(emp.id) }}</span>
+            <span class="empresa-nombre" (click)="seleccionarEmpresaFiltro(emp)">{{ emp.nombre }}</span>
+            <button class="menu-dots" (click)="toggleDropdown($event, emp.id)">⋮</button>
+            <div class="dropdown" *ngIf="dropdownAbierto === emp.id" (click)="$event.stopPropagation()">
+              <div class="dropdown-item" (click)="irAInventario(emp.id)">📦 Inventario</div>
+              <div class="dropdown-item" (click)="irAConsumo(emp.id)">⚡ Consumo</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div class="header-botones">
+</div>
       <div class="contenido-panel">
         <div class="resumen-todas">
           <h2>Resumen de {{ empresaFiltro ? empresaFiltro.nombre : 'Todas las Empresas' }}</h2>
@@ -60,7 +89,6 @@ interface Empresa {
               <div class="filter-tipo">
                 <label>Filtrar por tipo:</label>
                 <select [(ngModel)]="filtroTipoInventario" (change)="filtroTipoInventario = filtroTipoInventario">
-                  <option value="">Todos</option>
                   <option value="electrica">Energía eléctrica del servicio público</option>
                   <option value="renovable">Energías renovables</option>
                   <option value="combustibles">Energía a partir de combustibles</option>
@@ -91,7 +119,6 @@ interface Empresa {
               <div class="filter-tipo">
                 <label>Filtrar por tipo:</label>
                 <select [(ngModel)]="filtroTipoConsumo" (change)="filtroTipoConsumo = filtroTipoConsumo">
-                  <option value="">Todos</option>
                   <option value="gas_electrica">Gas para energía eléctrica</option>
                   <option value="gas_calor">Gas para generar calor</option>
                   <option value="vendida">Energía Vendida</option>
@@ -211,6 +238,25 @@ interface Empresa {
   `,
   styles: [`
     .dashboard { display: flex; flex-direction: column; min-height: calc(100vh - 60px); }
+    .empresas-panel-main { background: #1B5E20; padding: 20px; margin: 16px 24px; border-radius: 12px; }
+    .empresas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .empresas-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: white; }
+    .empresas-icon { font-size: 24px; }
+    .empresas-list { display: flex; flex-direction: column; gap: 4px; }
+    .empresas-list .empresa-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: white; border-radius: 6px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .empresas-list .empresa-item:hover { background: rgba(255,255,255,0.1); }
+    .empresas-list .empresa-icon { font-size: 18px; }
+    .empresas-list .empresa-nombre { flex: 1; font-size: 14px; }
+    .empresas-list .menu-dots { background: none; border: none; color: white; cursor: pointer; font-size: 18px; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+    .empresas-list .menu-dots:hover { background: rgba(255,255,255,0.2); }
+    .empresas-list .dropdown { position: absolute; right: 8px; top: 100%; background: #fff; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); min-width: 150px; z-index: 1000; display: block; margin-top: 4px; }
+    .empresas-list .dropdown-item { padding: 10px 14px; color: #333; font-size: 14px; cursor: pointer; }
+    .empresas-list .dropdown-item:hover { background: #f5f5f5; }
+    .empresas-panel .form-crear { background: white; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
+    .empresas-panel .form-crear input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
+    .empresas-panel .form-botones { display: flex; gap: 8px; }
+    .empresas-panel .btn-crear { flex: 1; background: #4CAF50; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .empresas-panel .btn-cancelar { flex: 1; background: #ddd; color: #333; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
     .header-botones { display: flex; justify-content: flex-end; padding: 16px 24px 0; }
     .btn-empresas { background: #1B5E20; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
     .btn-empresas:hover { background: #2E7D32; }

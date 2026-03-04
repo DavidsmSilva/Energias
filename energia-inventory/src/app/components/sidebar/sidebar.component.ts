@@ -16,12 +16,12 @@ import { CommonModule } from '@angular/common';
       <nav class="menu">
         <div class="menu-seccion">
           <div class="menu-titulo">Navegación</div>
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="menu-item">🏠 Inicio</a>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="menu-item">🏠 Energia</a>
         </div>
         
         <div class="menu-seccion">
           <div class="menu-titulo">Gestión</div>
-          <a routerLink="/empresas" routerLinkActive="active" class="menu-item">🏢 Empresas</a>
+          
           <a routerLink="/inventario" routerLinkActive="active" class="menu-item">📦 Inventario</a>
           <a routerLink="/consumo" routerLinkActive="active" class="menu-item">⚡ Consumo</a>
         </div>

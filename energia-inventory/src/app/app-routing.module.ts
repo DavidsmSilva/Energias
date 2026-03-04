@@ -4,9 +4,11 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { InventarioComponent } from './pages/inventario/inventario.component';
 import { ConsumoComponent } from './pages/consumo/consumo.component';
 import { AjustesComponent } from './pages/ajustes/ajustes.component';
+import { InicioComponent } from './pages/inicio/inicio.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', component: DashboardComponent },
+  { path: 'inicio', component: InicioComponent },
   { path: 'inventario', component: InventarioComponent },
   { path: 'inventario/:empresaId', component: InventarioComponent },
   { path: 'consumo', component: ConsumoComponent },

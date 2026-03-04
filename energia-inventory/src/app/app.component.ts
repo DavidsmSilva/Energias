@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { EmpresaService } from './services/empresa.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { HeaderComponent } from './components/header/header.component';
 
 interface Empresa {
   id: number;
@@ -11,7 +14,9 @@ interface Empresa {
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, HeaderComponent]
 })
 export class AppComponent implements OnInit {
   pageTitle = '';
@@ -49,8 +54,10 @@ export class AppComponent implements OnInit {
       const url = navEvent.urlAfterRedirects;
       this.rutaActual = url;
       
-      if (url === '/' || url === '') {
+      if (url === '/inicio') {
         this.pageTitle = 'Inicio';
+      } else if (url === '/' || url === '') {
+        this.pageTitle = 'Energia';
       } else if (url.startsWith('/inventario')) {
         const empresaId = this.getEmpresaIdFromUrl(url);
         if (empresaId) {
@@ -127,6 +134,10 @@ export class AppComponent implements OnInit {
   }
 
   irAInicio() {
+    this.router.navigate(['/inicio']);
+  }
+
+  irAEnergia() {
     this.router.navigate(['/']);
   }
 

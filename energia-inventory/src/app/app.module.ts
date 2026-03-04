@@ -16,7 +16,6 @@ import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    AppComponent,
     EmpresaListComponent,
     SlidesDialogComponent
   ],
@@ -32,6 +31,6 @@ import { FormsModule } from '@angular/forms';
     HeaderComponent
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: []
 })
 export class AppModule { }
