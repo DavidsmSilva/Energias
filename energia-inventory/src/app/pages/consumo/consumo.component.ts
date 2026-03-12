@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { DatosService, RegistroConsumo } from '../../services/datos.service';
 import { EmpresaService } from '../../services/empresa.service';
 
@@ -31,6 +32,7 @@ interface EmpresaResumen {
   selector: 'app-consumo',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="contenido">
       <!-- Vista de todas las empresas -->
@@ -50,7 +52,7 @@ interface EmpresaResumen {
             </tr>
           </thead>
           <tbody>
-            <ng-container *ngFor="let emp of empresasResumen">
+            <ng-container *ngFor="let emp of empresasResumen; trackBy: trackByEmpresaId">
               <tr *ngFor="let reg of emp.registros; let first = first" [class.first-row]="first">
                 <td *ngIf="first" [attr.rowspan]="emp.registros.length" class="empresa-cell">{{ emp.nombre }}</td>
                 <td>{{ getNombreTipo(reg.tipoEnergia) }}</td>
@@ -115,14 +117,7 @@ interface EmpresaResumen {
               </select>
             </div>
             <div class="form-group">
-              <label>Unidad de Medida</label>
-              <select>
-                <option>m³</option><option>lb</option><option>kg</option>
-                <option>Cilindro 100 lb</option><option>Cilindro 40 lb</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Cantidad de Gas</label>
+              <label>Unidad de medida m³</label>
               <input type="number" [(ngModel)]="formDatagas_electrica.cantidadGas" placeholder="0.00">
             </div>
             <div class="form-group">
@@ -198,8 +193,12 @@ interface EmpresaResumen {
               </select>
             </div>
             <div class="form-group">
-              <label>Cantidad de Energía Vendida (kWh)</label>
+              <label>Cantidad de Energía Vendida</label>
               <input type="number" [(ngModel)]="formDatavendida.cantidad" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Unidad kWh</label>
+              <input type="number" [(ngModel)]="formDatavendida.unidadKwh" placeholder="0.00">
             </div>
           </div>
           <button class="btn-guardar" (click)="guardarVendida()">Guardar</button>
@@ -225,8 +224,12 @@ interface EmpresaResumen {
               </select>
             </div>
             <div class="form-group">
-              <label>Cantidad de Energía Recibida (kWh)</label>
+              <label>Cantidad de Energía Recibida</label>
               <input type="number" [(ngModel)]="formDatarecibida.cantidad" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Unidad kWh</label>
+              <input type="number" [(ngModel)]="formDatarecibida.unidadKwh" placeholder="0.00">
             </div>
           </div>
           <button class="btn-guardar" (click)="guardarRecibida()">Guardar</button>
@@ -252,8 +255,12 @@ interface EmpresaResumen {
               </select>
             </div>
             <div class="form-group">
-              <label>Cantidad de Energía Cedida (kWh)</label>
+              <label>Cantidad de Energía Cedida</label>
               <input type="number" [(ngModel)]="formDatacedida.cantidad" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Unidad kWh</label>
+              <input type="number" [(ngModel)]="formDatacedida.unidadKwh" placeholder="0.00">
             </div>
           </div>
           <button class="btn-guardar" (click)="guardarCedida()">Guardar</button>
@@ -274,7 +281,7 @@ interface EmpresaResumen {
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let reg of registros">
+            <tr *ngFor="let reg of registros; trackBy: trackByRegistro">
               <td>{{ getNombreTipo(reg.tipoEnergia) }}</td>
               <td>{{ reg.mes }} / {{ reg.ano }}</td>
               <td>{{ reg.cantidad ? reg.cantidad + ' kWh' : '-' }}</td>
@@ -351,29 +358,32 @@ interface EmpresaResumen {
     }
   `]
 })
-export class ConsumoComponent implements OnInit {
+export class ConsumoComponent implements OnInit, OnDestroy {
   tipoEnergia: string = 'gas_electrica';
   registros: RegistroConsumoLocal[] = [];
   empresaId: number = 1;
   empresas: Empresa[] = [];
   registroExpandido: number | null = null;
 
-  formDatagas_electrica = { mes: 'Enero', ano: '2026', tipoGas: 'Gas Natural', cantidadGas: 0, poderCalorifico: 0, unidadKwh: 0 };
-  formDatagas_calor = { mes: 'Enero', ano: '2026', tipoGas: 'Gas Natural', cantidadGas: 0 };
-  formDatavendida = { mes: 'Enero', ano: '2026', cantidad: 0 };
-  formDatarecibida = { mes: 'Enero', ano: '2026', cantidad: 0 };
-  formDatacedida = { mes: 'Enero', ano: '2026', cantidad: 0 };
+   formDatagas_electrica = { mes: 'Enero', ano: '2026', tipoGas: 'Gas Natural', cantidadGas: 0, poderCalorifico: 0, unidadKwh: 0 };
+   formDatagas_calor = { mes: 'Enero', ano: '2026', tipoGas: 'Gas Natural', cantidadGas: 0 };
+   formDatavendida = { mes: 'Enero', ano: '2026', cantidad: 0, unidadKwh: 0 };
+   formDatarecibida = { mes: 'Enero', ano: '2026', cantidad: 0, unidadKwh: 0 };
+   formDatacedida = { mes: 'Enero', ano: '2026', cantidad: 0, unidadKwh: 0 };
 
   empresasResumen: EmpresaResumen[] = [];
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private datosService: DatosService,
     private empresaService: EmpresaService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       if (params['empresaId']) {
         this.empresaId = Number(params['empresaId']);
         this.empresaService.setEmpresa(this.empresaId);
@@ -382,24 +392,40 @@ export class ConsumoComponent implements OnInit {
       }
     });
 
-    this.empresaService.empresas$.subscribe(empresas => {
+    this.empresaService.empresas$.pipe(takeUntil(this.destroy$)).subscribe(empresas => {
       this.empresas = Object.entries(empresas).map(([id, nombre]) => ({
         id: Number(id),
         nombre: nombre
       }));
       this.actualizarResumen();
+      this.cdr.markForCheck();
     });
 
-    this.empresaService.empresaId$.subscribe(id => {
+    this.empresaService.empresaId$.pipe(takeUntil(this.destroy$)).subscribe(id => {
       if (!this.route.snapshot.paramMap.get('empresaId')) {
         this.empresaId = id;
       }
       this.actualizarRegistros();
+      this.cdr.markForCheck();
     });
-    this.datosService.consumo$.subscribe(() => {
+    this.datosService.consumo$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.actualizarRegistros();
       this.actualizarResumen();
+      this.cdr.markForCheck();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  trackByEmpresaId(index: number, item: EmpresaResumen): number {
+    return item.id;
+  }
+
+  trackByRegistro(index: number, item: RegistroConsumoLocal): string {
+    return `${item.tipoEnergia}-${item.mes}-${item.ano}`;
   }
 
   actualizarResumen() {

@@ -7,6 +7,7 @@
     <nav class="panel-nav">
       <a class="nav-item" [class.active]="rutaActual === '/inicio'" (click)="irAInicio()">🏠 Inicio</a>
       <a class="nav-item" [class.active]="rutaActual === '/'" (click)="irAEnergia()">⚡ Energia</a>
+      <a class="nav-item" [class.active]="rutaActual.startsWith('/agua')" (click)="irAAgua()">💧 Agua</a>
       <a class="nav-item" [class.active]="rutaActual === '/ajustes'" (click)="irAAjustes()">⚙️ Ajustes</a>
     </nav>
   </aside>

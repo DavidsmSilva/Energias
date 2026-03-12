@@ -80,6 +80,17 @@ export class AppComponent implements OnInit {
         } else {
           this.pageTitle = 'Consumo';
         }
+      } else if (url.startsWith('/agua')) {
+        const empresaId = this.getEmpresaIdFromUrl(url);
+        if (empresaId) {
+          this.empresaSeleccionada = empresaId;
+          const empresa = this.empresas.find(e => e.id === empresaId);
+          this.empresaNombre = empresa ? empresa.nombre : '';
+          this.empresaService.setEmpresa(empresaId);
+          this.pageTitle = 'Fuentes de Agua - ' + this.empresaNombre;
+        } else {
+          this.pageTitle = 'Fuentes de Agua';
+        }
       } else if (url.startsWith('/ajustes')) {
         this.pageTitle = 'Ajustes';
       }
@@ -139,6 +150,10 @@ export class AppComponent implements OnInit {
 
   irAEnergia() {
     this.router.navigate(['/']);
+  }
+
+  irAAgua() {
+    this.router.navigate(['/agua']);
   }
 
   irAInventario() {

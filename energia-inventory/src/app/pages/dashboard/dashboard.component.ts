@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { DatosService, RegistroInventario, RegistroConsumo } from '../../services/datos.service';
 import { EmpresaService } from '../../services/empresa.service';
 
@@ -14,6 +16,7 @@ interface Empresa {
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dashboard">
       <div class="empresas-panel-main">
@@ -34,13 +37,20 @@ interface Empresa {
         </div>
 
         <div class="empresas-list">
-          <div class="empresa-item" *ngFor="let emp of empresas">
+          <div class="empresa-item" *ngFor="let emp of empresas; trackBy: trackByEmpresaId">
             <span class="empresa-icon">{{ getIcono(emp.id) }}</span>
             <span class="empresa-nombre" (click)="seleccionarEmpresaFiltro(emp)">{{ emp.nombre }}</span>
             <button class="menu-dots" (click)="toggleDropdown($event, emp.id)">⋮</button>
             <div class="dropdown" *ngIf="dropdownAbierto === emp.id" (click)="$event.stopPropagation()">
-              <div class="dropdown-item" (click)="irAInventario(emp.id)">📦 Inventario</div>
-              <div class="dropdown-item" (click)="irAConsumo(emp.id)">⚡ Consumo</div>
+              <ng-container *ngIf="!esAgua">
+                <div class="dropdown-header">⚡ Energía</div>
+                <div class="dropdown-item" (click)="irAInventario(emp.id)">📦 Inventario</div>
+                <div class="dropdown-item" (click)="irAConsumo(emp.id)">⚡ Consumo</div>
+              </ng-container>
+              <ng-container *ngIf="esAgua">
+                <div class="dropdown-header">💧 Agua</div>
+                <div class="dropdown-item" (click)="irAInventarioAgua(emp.id)">💧 Fuentes de Agua</div>
+              </ng-container>
             </div>
           </div>
         </div>
@@ -54,8 +64,8 @@ interface Empresa {
           
           <button *ngIf="empresaFiltro" class="btn-volver" (click)="empresaFiltro = null">← Ver todas las empresas</button>
           
-          <div class="resumen-grid" *ngIf="!empresaFiltro">
-            <div class="resumen-empresa" *ngFor="let emp of empresasResumen">
+          <div class="resumen-grid" *ngIf="!empresaFiltro && !esAgua">
+            <div class="resumen-empresa" *ngFor="let emp of empresasResumen; trackBy: trackByEmpresaId">
               <div class="empresa-card" (click)="seleccionarEmpresaFiltro(emp)">
                 <div class="empresa-card-header">
                   <span class="empresa-icon">{{ getIcono(emp.id) }}</span>
@@ -79,7 +89,24 @@ interface Empresa {
             </div>
           </div>
 
-          <div class="detalle-empresa" *ngIf="empresaFiltro">
+          <div class="resumen-grid" *ngIf="!empresaFiltro && esAgua">
+            <div class="resumen-empresa" *ngFor="let emp of empresas; trackBy: trackByEmpresaId">
+              <div class="empresa-card" (click)="seleccionarEmpresaFiltro(emp)">
+                <div class="empresa-card-header">
+                  <span class="empresa-icon">{{ getIcono(emp.id) }}</span>
+                  <h3>{{ emp.nombre }}</h3>
+                </div>
+                <div class="empresa-card-body">
+                  <div class="stat">
+                    <span class="stat-label">💧 Fuentes de Agua</span>
+                    <span class="stat-value">{{ getRegistrosAgua(emp.id).length }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detalle-empresa" *ngIf="empresaFiltro && !esAgua">
             <div class="tabs">
               <button class="tab" [class.active]="tabActiva === 'inventario'" (click)="tabActiva = 'inventario'">📦 Inventario</button>
               <button class="tab" [class.active]="tabActiva === 'consumo'" (click)="tabActiva = 'consumo'">⚡ Consumo</button>
@@ -104,7 +131,7 @@ interface Empresa {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let reg of getInventarioEmpresaFiltrado()" (click)="abrirDetalleInventario(reg)" class="fila-clickable">
+                  <tr *ngFor="let reg of getInventarioEmpresaFiltrado(); trackBy: trackByRegistroInventario" (click)="abrirDetalleInventario(reg)" class="fila-clickable">
                     <td>{{ getNombreTipoInventario(reg.tipoEnergia) }}</td>
                     <td>{{ reg.mes }} / {{ reg.ano }}</td>
                   </tr>
@@ -134,7 +161,7 @@ interface Empresa {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let reg of getConsumoEmpresaFiltrado()" (click)="abrirDetalleConsumo(reg)" class="fila-clickable">
+                  <tr *ngFor="let reg of getConsumoEmpresaFiltrado(); trackBy: trackByRegistroConsumo" (click)="abrirDetalleConsumo(reg)" class="fila-clickable">
                     <td>{{ getNombreTipoConsumo(reg.tipoEnergia) }}</td>
                     <td>{{ reg.mes }} / {{ reg.ano }}</td>
                   </tr>
@@ -146,11 +173,35 @@ interface Empresa {
             </div>
           </div>
 
+          <div class="detalle-empresa" *ngIf="empresaFiltro && esAgua">
+            <div class="tabla-container">
+              <table class="tabla-datos">
+                <thead>
+                  <tr>
+                    <th>Fuente de Captación</th>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let reg of getRegistrosAgua(empresaFiltro.id)" class="fila-clickable" (click)="abrirDetalleAgua(reg)">
+                    <td>{{ getNombreTipoAgua(reg.tipoEnergia) }}</td>
+                    <td>{{ reg.mes }} / {{ reg.ano }}</td>
+                    <td>{{ reg.cantidad || '-' }}</td>
+                  </tr>
+                  <tr *ngIf="getRegistrosAgua(empresaFiltro.id).length === 0">
+                    <td colspan="3" class="sin-datos">Sin registros de Fuentes de Agua</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <!-- Modal de Detalle -->
           <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
             <div class="modal-content" (click)="$event.stopPropagation()">
               <div class="modal-header">
-                <h2>{{ tipoDetalle === 'inventario' ? 'Inventario' : 'Consumo' }}</h2>
+                <h2>{{ tipoDetalle === 'inventario' ? 'Inventario' : tipoDetalle === 'consumo' ? 'Consumo' : 'Fuentes de Agua' }}</h2>
                 <button class="modal-close" (click)="cerrarModal()">×</button>
               </div>
               <div class="modal-body">
@@ -229,6 +280,48 @@ interface Empresa {
                     <div class="detalle-item" *ngIf="registroDetalle.cantidad"><strong>Cantidad:</strong> {{ registroDetalle.cantidad }} kWh</div>
                   </ng-container>
                 </div>
+
+                <!-- Fuentes de Agua -->
+                <div class="detalle-grid" *ngIf="tipoDetalle === 'agua' && registroDetalle">
+                  <div class="detalle-item"><strong>Fuente de Captación:</strong> {{ getNombreTipoAgua(registroDetalle.tipoEnergia) }}</div>
+                  <div class="detalle-item"><strong>Fecha:</strong> {{ registroDetalle.mes }} / {{ registroDetalle.ano }}</div>
+                  
+                  <ng-container *ngIf="registroDetalle.cantidad">
+                    <div class="detalle-item"><strong>Cantidad:</strong> {{ registroDetalle.cantidad }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.unidad">
+                    <div class="detalle-item"><strong>Cantidad (m³):</strong> {{ registroDetalle.unidad }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.costo">
+                    <div class="detalle-item"><strong>Costo:</strong> {{ '$' + registroDetalle.costo }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.numeroMeses">
+                    <div class="detalle-item"><strong>N° Meses:</strong> {{ registroDetalle.numeroMeses }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.tipoCombustible">
+                    <div class="detalle-item"><strong>Tipo de Tratamiento:</strong> {{ registroDetalle.tipoCombustible }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.tipoBiomasa">
+                    <div class="detalle-item"><strong>Calidad del Agua:</strong> {{ registroDetalle.tipoBiomasa }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.poderCalorifico">
+                    <div class="detalle-item"><strong>Volumen:</strong> {{ registroDetalle.poderCalorifico }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.tipoFuente">
+                    <div class="detalle-item"><strong>Tipo de Fuente:</strong> {{ registroDetalle.tipoFuente }}</div>
+                  </ng-container>
+                  
+                  <ng-container *ngIf="registroDetalle.fuenteReuso">
+                    <div class="detalle-item"><strong>Fuente de Reuso:</strong> {{ registroDetalle.fuenteReuso }}</div>
+                  </ng-container>
+                </div>
               </div>
             </div>
           </div>
@@ -252,6 +345,7 @@ interface Empresa {
     .empresas-list .dropdown { position: absolute; right: 8px; top: 100%; background: #fff; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); min-width: 150px; z-index: 1000; display: block; margin-top: 4px; }
     .empresas-list .dropdown-item { padding: 10px 14px; color: #333; font-size: 14px; cursor: pointer; }
     .empresas-list .dropdown-item:hover { background: #f5f5f5; }
+    .empresas-list .dropdown-header { padding: 8px 14px 4px; font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; }
     .empresas-panel .form-crear { background: white; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
     .empresas-panel .form-crear input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
     .empresas-panel .form-botones { display: flex; gap: 8px; }
@@ -422,7 +516,7 @@ interface Empresa {
     }
   `]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   empresas: Empresa[] = [];
   empresaSeleccionada: number = 1;
   empresaActual: Empresa | null = null;
@@ -438,7 +532,7 @@ export class DashboardComponent implements OnInit {
   mostrarModal: boolean = false;
   tipoModal: 'inventario' | 'consumo' = 'inventario';
   
-  tipoDetalle: 'inventario' | 'consumo' = 'inventario';
+  tipoDetalle: 'inventario' | 'consumo' | 'agua' = 'inventario';
   registroDetalle: any = null;
   
   filtroTipoInventario: string = '';
@@ -449,41 +543,97 @@ export class DashboardComponent implements OnInit {
   consumoTotal: { nombre: string; registros: any[] }[] = [];
   
   empresaFiltro: { id: number; nombre: string } | null = null;
+  esAgua: boolean = false;
   empresaFiltroId: number = 0;
   
   private iconos = ['🌱', '🔥', '⚡', '🏭', '🏬', '🏪', '🏫', '🏩', '🏢', '🌟'];
+  private destroy$ = new Subject<void>();
+  
+  private tiposAgua = ['acueducto', 'superficial', 'lluvia', 'reuso', 'subterranea', 'distrito_riego', 'carrotanque'];
+  private tiposAguaConsumo = ['acueducto_consumo', 'superficial_consumo', 'lluvia_consumo', 'reuso_consumo', 'subterranea_consumo', 'distrito_riego_consumo', 'carrotanque_consumo'];
+
+  isTipoAgua(tipoEnergia: string): boolean {
+    return this.tiposAgua.includes(tipoEnergia);
+  }
+
+  isTipoAguaConsumo(tipoEnergia: string): boolean {
+    return this.tiposAguaConsumo.includes(tipoEnergia);
+  }
+
+  getRegistrosAgua(empresaId: number): any[] {
+    const inventario = this.datosService.getInventarioPorEmpresa(empresaId).filter(r => this.isTipoAgua(r.tipoEnergia));
+    const consumo = this.datosService.getConsumoPorEmpresa(empresaId).filter(r => this.isTipoAguaConsumo(r.tipoEnergia));
+    return [...inventario, ...consumo];
+  }
 
   constructor(
     private datosService: DatosService,
     private empresaService: EmpresaService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.empresaService.empresas$.subscribe(empresas => {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event) => {
+      const navEvent = event as NavigationEnd;
+      this.esAgua = navEvent.urlAfterRedirects.startsWith('/agua');
+      this.cdr.markForCheck();
+    });
+    
+    this.esAgua = this.router.url.startsWith('/agua');
+
+    this.empresaService.empresas$.pipe(takeUntil(this.destroy$)).subscribe(empresas => {
       this.empresas = Object.entries(empresas).map(([id, nombre]) => ({
         id: Number(id),
         nombre: nombre
       }));
       this.actualizarResumen();
+      this.cdr.markForCheck();
     });
 
-    this.datosService.inventario$.subscribe(data => {
+    this.datosService.inventario$.pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.inventario = data;
       this.actualizarResumen();
+      this.cdr.markForCheck();
     });
-    this.datosService.consumo$.subscribe(data => {
+    this.datosService.consumo$.pipe(takeUntil(this.destroy$)).subscribe(data => {
       this.consumo = data;
       this.actualizarResumen();
+      this.cdr.markForCheck();
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  trackByEmpresaId(index: number, item: { id: number; nombre: string }): number {
+    return item.id;
+  }
+
+  trackByRegistroInventario(index: number, item: RegistroInventario): string {
+    return `${item.tipoEnergia}-${item.mes}-${item.ano}`;
+  }
+
+  trackByRegistroConsumo(index: number, item: RegistroConsumo): string {
+    return `${item.tipoEnergia}-${item.mes}-${item.ano}`;
+  }
+
   actualizarResumen() {
+    const registrosInvEnergia = (empId: number) => 
+      this.inventario.filter(r => r.empresaId === empId && !this.isTipoAgua(r.tipoEnergia)).length;
+    const registrosConsEnergia = (empId: number) => 
+      this.consumo.filter(r => r.empresaId === empId && !this.isTipoAguaConsumo(r.tipoEnergia)).length;
+
     this.empresasResumen = this.empresas.map(emp => ({
       id: emp.id,
       nombre: emp.nombre,
-      registrosInv: this.inventario.filter(r => r.empresaId === emp.id).length,
-      registrosCons: this.consumo.filter(r => r.empresaId === emp.id).length
+      registrosInv: registrosInvEnergia(emp.id),
+      registrosCons: registrosConsEnergia(emp.id)
     }));
 
     const empresasFiltrar = this.empresaFiltro 
@@ -492,12 +642,12 @@ export class DashboardComponent implements OnInit {
 
     this.inventarioTotal = empresasFiltrar.map(emp => ({
       nombre: emp.nombre,
-      registros: this.inventario.filter(r => r.empresaId === emp.id)
+      registros: this.inventario.filter(r => r.empresaId === emp.id && !this.isTipoAgua(r.tipoEnergia))
     }));
 
     this.consumoTotal = empresasFiltrar.map(emp => ({
       nombre: emp.nombre,
-      registros: this.consumo.filter(r => r.empresaId === emp.id)
+      registros: this.consumo.filter(r => r.empresaId === emp.id && !this.isTipoAguaConsumo(r.tipoEnergia))
     }));
   }
 
@@ -514,7 +664,7 @@ export class DashboardComponent implements OnInit {
 
   getInventarioEmpresa(): any[] {
     if (!this.empresaFiltro) return [];
-    return this.inventario.filter(r => r.empresaId === this.empresaFiltro.id);
+    return this.inventario.filter(r => r.empresaId === this.empresaFiltro.id && !this.isTipoAgua(r.tipoEnergia));
   }
 
   getInventarioEmpresaFiltrado(): any[] {
@@ -525,7 +675,7 @@ export class DashboardComponent implements OnInit {
 
   getConsumoEmpresa(): any[] {
     if (!this.empresaFiltro) return [];
-    return this.consumo.filter(r => r.empresaId === this.empresaFiltro.id);
+    return this.consumo.filter(r => r.empresaId === this.empresaFiltro.id && !this.isTipoAguaConsumo(r.tipoEnergia));
   }
 
   getConsumoEmpresaFiltrado(): any[] {
@@ -542,6 +692,12 @@ export class DashboardComponent implements OnInit {
 
   abrirDetalleConsumo(reg: any) {
     this.tipoDetalle = 'consumo';
+    this.registroDetalle = reg;
+    this.mostrarModal = true;
+  }
+
+  abrirDetalleAgua(reg: any) {
+    this.tipoDetalle = 'agua';
     this.registroDetalle = reg;
     this.mostrarModal = true;
   }
@@ -604,6 +760,28 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/consumo']);
   }
 
+  irAInventarioAgua(empresaId?: number) {
+    if (empresaId) {
+      this.empresaService.setEmpresa(empresaId);
+      this.empresaSeleccionada = empresaId;
+      this.empresaActual = this.empresas.find(e => e.id === empresaId) || null;
+      this.router.navigate(['/agua', empresaId]);
+    } else {
+      this.router.navigate(['/agua']);
+    }
+  }
+
+  irAConsumoAgua(empresaId?: number) {
+    if (empresaId) {
+      this.empresaService.setEmpresa(empresaId);
+      this.empresaSeleccionada = empresaId;
+      this.empresaActual = this.empresas.find(e => e.id === empresaId) || null;
+      this.router.navigate(['/agua', empresaId]);
+    } else {
+      this.router.navigate(['/agua']);
+    }
+  }
+
   mostrarDetalle(tipo: 'inventario' | 'consumo') {
     this.tipoModal = tipo;
     this.mostrarModal = true;
@@ -643,6 +821,26 @@ export class DashboardComponent implements OnInit {
       'vendida': 'Energía Vendida',
       'recibida': 'Energía Recibida',
       'cedida': 'Energía Cedida'
+    };
+    return tipos[tipo] || tipo;
+  }
+
+  getNombreTipoAgua(tipo: string): string {
+    const tipos: { [key: string]: string } = {
+      'acueducto': 'Agua de Acueducto',
+      'acueducto_consumo': 'Agua de Acueducto',
+      'superficial': 'Agua de Fuente Superficial',
+      'superficial_consumo': 'Agua de Fuente Superficial',
+      'lluvia': 'Agua Lluvia',
+      'lluvia_consumo': 'Agua Lluvia',
+      'reuso': 'Agua Reuso',
+      'reuso_consumo': 'Agua Reuso',
+      'subterranea': 'Agua de Fuente Subterránea',
+      'subterranea_consumo': 'Agua de Fuente Subterránea',
+      'distrito_riego': 'Agua de Distrito de Riego',
+      'distrito_riego_consumo': 'Agua de Distrito de Riego',
+      'carrotanque': 'Agua de Carrotanque',
+      'carrotanque_consumo': 'Agua de Carrotanque'
     };
     return tipos[tipo] || tipo;
   }

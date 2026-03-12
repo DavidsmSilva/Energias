@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EmpresaService } from '../../services/empresa.service';
@@ -7,6 +7,7 @@ import { EmpresaService } from '../../services/empresa.service';
   selector: 'app-empresas',
   standalone: true,
   imports: [CommonModule, RouterModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="empresas-page">
       <div class="page-header">
@@ -24,7 +25,7 @@ import { EmpresaService } from '../../services/empresa.service';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let empresa of empresasList" [class.active]="empresa.id === empresaService.getEmpresaId()">
+            <tr *ngFor="let empresa of empresasList; trackBy: trackByEmpresaId" [class.active]="empresa.id === empresaService.getEmpresaId()">
               <td>{{ empresa.id }}</td>
               <td>
                 <span class="empresa-icon">{{ getIcon(empresa.id) }}</span>
@@ -63,20 +64,6 @@ import { EmpresaService } from '../../services/empresa.service';
 export class EmpresasPageComponent {
   empresasList: { id: number; nombre: string }[] = [];
 
-  /* 
-  Código guardado para referencia futura (migrado desde app.component.html):
-  
-  <div class="empresa-item" *ngFor="let empresa of empresas" [class.active]="empresaSeleccionada === empresa.id">
-    <span class="empresa-icon">{{ getIcono(empresa.id) }}</span>
-    <span class="empresa-nombre">{{ empresa.nombre }}</span>
-    <button class="menu-dots" (click)="toggleDropdown($event, empresa.id)">⋮</button>
-    <div class="dropdown" *ngIf="dropdownAbierto === empresa.id" (click)="$event.stopPropagation()">
-      <div class="dropdown-item" (click)="irAInventarioEmpresa(empresa.id)">📦 Inventario</div>
-      <div class="dropdown-item" (click)="irAConsumoEmpresa(empresa.id)">⚡ Consumo</div>
-    </div>
-  </div>
-  */
-
   constructor(public empresaService: EmpresaService) {
     const empresas = this.empresaService.getEmpresas();
     this.empresasList = Object.entries(empresas).map(([id, nombre]) => ({
@@ -92,6 +79,10 @@ export class EmpresasPageComponent {
 
   seleccionarEmpresa(id: number): void {
     this.empresaService.setEmpresa(id);
+  }
+
+  trackByEmpresaId(index: number, item: { id: number; nombre: string }): number {
+    return item.id;
   }
 
   agregarEmpresa(): void {

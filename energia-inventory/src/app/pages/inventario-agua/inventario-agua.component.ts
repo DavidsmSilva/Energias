@@ -11,97 +11,93 @@ interface Empresa {
   nombre: string;
 }
 
-interface RegistroInventarioLocal {
-  tipoEnergia: string;
+interface RegistroAgua {
+  tipoFuente: string;
   mes: string;
   ano: string;
   cantidad?: number;
   numeroMeses?: number;
   costo?: number;
-  tipoCombustible?: string;
-  cantidadCombustible?: number;
-  poderCalorifico?: number;
-  tipoBiomasa?: string;
-  tipoFuente?: string;
+  tipoTratamiento?: string;
+  calidadAgua?: string;
+  volumen?: number;
 }
 
 interface EmpresaResumen {
   id: number;
   nombre: string;
-  registros: RegistroInventarioLocal[];
+  registros: RegistroAgua[];
 }
 
 @Component({
-  selector: 'app-inventario',
+  selector: 'app-fuentes-agua',
   standalone: true,
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="contenido">
-      <!-- Vista de todas las empresas -->
       <div class="tabla-container" *ngIf="!empresaId">
-        <h3>Inventario - Todas las Empresas</h3>
+        <h3>Fuentes de Agua - Todas las Empresas</h3>
         <table class="tabla-datos">
           <thead>
             <tr>
               <th>Empresa</th>
-              <th>Tipo</th>
+              <th>Fuente de Captación</th>
               <th>Fecha</th>
               <th>Cantidad</th>
               <th>N° Meses</th>
               <th>Costo</th>
-              <th>Combustible</th>
-              <th>Biomasa</th>
-              <th>Fuente</th>
+              <th>Tratamiento</th>
+              <th>Calidad</th>
             </tr>
           </thead>
           <tbody>
             <ng-container *ngFor="let emp of empresasResumen; trackBy: trackByEmpresaId">
               <tr *ngFor="let reg of emp.registros; let first = first" [class.first-row]="first">
                 <td *ngIf="first" [attr.rowspan]="emp.registros.length" class="empresa-cell">{{ emp.nombre }}</td>
-                <td>{{ getNombreTipo(reg.tipoEnergia) }}</td>
+                <td>{{ getNombreTipo(reg.tipoFuente) }}</td>
                 <td>{{ reg.mes }} / {{ reg.ano }}</td>
                 <td>{{ reg.cantidad || '-' }}</td>
                 <td>{{ reg.numeroMeses || '-' }}</td>
                 <td>{{ reg.costo ? '$' + reg.costo : '-' }}</td>
-                <td>{{ reg.tipoCombustible || '-' }}</td>
-                <td>{{ reg.tipoBiomasa || '-' }}</td>
-                <td>{{ reg.tipoFuente || '-' }}</td>
+                <td>{{ reg.tipoTratamiento || '-' }}</td>
+                <td>{{ reg.calidadAgua || '-' }}</td>
               </tr>
               <tr *ngIf="emp.registros.length === 0">
                 <td class="empresa-cell">{{ emp.nombre }}</td>
-                <td colspan="8" class="sin-datos">Sin registros</td>
+                <td colspan="7" class="sin-datos">Sin registros</td>
               </tr>
             </ng-container>
             <tr *ngIf="empresasResumen.length === 0">
-              <td colspan="9" class="sin-datos">No hay empresas registradas</td>
+              <td colspan="8" class="sin-datos">No hay empresas registradas</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Vista de una empresa específica -->
       <div class="formulario" *ngIf="empresaId">
         <div class="filters">
           <div class="filter-group">
-            <label>Tipo de energía:</label>
-            <select class="filter-select" [(ngModel)]="tipoEnergia">
-              <option value="electrica">Energía eléctrica del servicio público</option>
-              <option value="renovable">Energías renovables</option>
-              <option value="combustibles">Energía a partir de combustibles (plantas eléctricas)</option>
-              <option value="biomasa_electrica">Energía a partir de biomasa u otros materiales para generar energía eléctrica</option>
-              <option value="biomasa_calor">Energía a partir de biomasa u otros materiales para generar calor</option>
+            <label>Fuente de Captación:</label>
+            <select class="filter-select" [(ngModel)]="tipoFuente">
+              <option value="acueducto">Agua de Acueducto</option>
+              <option value="superficial">Agua de Fuente Superficial</option>
+              <option value="lluvia">Agua Lluvia</option>
+              <option value="reuso">Agua Reuso</option>
+              <option value="subterranea">Agua de Fuente Subterránea</option>
+              <option value="distrito_riego">Agua de Distrito de Riego</option>
+              <option value="carrotanque">Agua de Carrotanque</option>
             </select>
           </div>
         </div>
 
-        <!-- Energía eléctrica del servicio público -->
-        <div class="form-section" *ngIf="tipoEnergia === 'electrica'">
-          <div class="form-title">Energía eléctrica del servicio público</div>
+        <!-- Agua de Acueducto -->
+        <div class="form-section" *ngIf="tipoFuente === 'acueducto'">
+          <div class="form-title">Agua de Acueducto</div>
           <div class="form-grid">
             <div class="form-group">
               <label>Mes</label>
-              <select [(ngModel)]="formDataelectrica.mes">
+              <select [(ngModel)]="formDataacueducto.mes">
                 <option>Enero</option><option>Febrero</option><option>Marzo</option>
                 <option>Abril</option><option>Mayo</option><option>Junio</option>
                 <option>Julio</option><option>Agosto</option><option>Septiembre</option>
@@ -110,33 +106,33 @@ interface EmpresaResumen {
             </div>
             <div class="form-group">
               <label>Año</label>
-              <select [(ngModel)]="formDataelectrica.ano">
+              <select [(ngModel)]="formDataacueducto.ano">
                 <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
               </select>
             </div>
             <div class="form-group">
               <label>Cantidad Consumida (mes)</label>
-              <input type="number" [(ngModel)]="formDataelectrica.cantidad" placeholder="0.00">
+              <input type="number" [(ngModel)]="formDataacueducto.cantidad" placeholder="0">
             </div>
             <div class="form-group">
-              <label>Unidad kWh</label>
-              <input type="number" [(ngModel)]="formDataelectrica.unidadKwh" placeholder="0.00">
+              <label>Cantidad (m³)</label>
+              <input type="number" [(ngModel)]="formDataacueducto.unidad" placeholder="0">
             </div>
             <div class="form-group">
               <label>Costo Total al Mes ($)</label>
-              <input type="number" [(ngModel)]="formDataelectrica.costo" placeholder="0.00">
+              <input type="number" [(ngModel)]="formDataacueducto.costo" placeholder="0.00">
             </div>
           </div>
-          <button class="btn-guardar" (click)="guardarElectrica()">Guardar</button>
+          <button class="btn-guardar" (click)="guardarAcueducto()">Guardar</button>
         </div>
 
-        <!-- Energías renovables -->
-        <div class="form-section" *ngIf="tipoEnergia === 'renovable'">
-          <div class="form-title">Energías renovables</div>
+        <!-- Agua de Fuente Superficial -->
+        <div class="form-section" *ngIf="tipoFuente === 'superficial'">
+          <div class="form-title">Agua de Fuente Superficial</div>
           <div class="form-grid">
             <div class="form-group">
               <label>Mes</label>
-              <select [(ngModel)]="formDatarenovable.mes">
+              <select [(ngModel)]="formDatasuperficial.mes">
                 <option>Enero</option><option>Febrero</option><option>Marzo</option>
                 <option>Abril</option><option>Mayo</option><option>Junio</option>
                 <option>Julio</option><option>Agosto</option><option>Septiembre</option>
@@ -145,80 +141,36 @@ interface EmpresaResumen {
             </div>
             <div class="form-group">
               <label>Año</label>
-              <select [(ngModel)]="formDatarenovable.ano">
+              <select [(ngModel)]="formDatasuperficial.ano">
                 <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
               </select>
-            </div>
-            <div class="form-group">
-              <label>Cantidad Consumida (mes)</label>
-              <input type="number" [(ngModel)]="formDatarenovable.cantidad" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label>Unidad kWh</label>
-              <input type="number" [(ngModel)]="formDatarenovable.unidadKwh" placeholder="0.00">
             </div>
             <div class="form-group">
               <label>Tipo de Fuente</label>
-              <select [(ngModel)]="formDatarenovable.tipoFuente">
-                <option>Solar</option><option>Eólica</option><option>Hidráulica</option><option>Geotérmica</option>
+              <select [(ngModel)]="formDatasuperficial.tipoFuente">
+                <option>Arroyo</option><option>Canal</option><option>Caño</option>
+                <option>Cienaga</option><option>Embalse</option><option>Estuario</option>
               </select>
-            </div>
-          </div>
-          <button class="btn-guardar" (click)="guardarRenovable()">Guardar</button>
-        </div>
-
-        <!-- Combustibles -->
-        <div class="form-section" *ngIf="tipoEnergia === 'combustibles'">
-          <div class="form-title">Energía a partir de combustibles</div>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Mes</label>
-              <select [(ngModel)]="formDatacombustibles.mes">
-                <option>Enero</option><option>Febrero</option><option>Marzo</option>
-                <option>Abril</option><option>Mayo</option><option>Junio</option>
-                <option>Julio</option><option>Agosto</option><option>Septiembre</option>
-                <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Año</label>
-              <select [(ngModel)]="formDatacombustibles.ano">
-                <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Tipo de Combustible</label>
-              <select [(ngModel)]="formDatacombustibles.tipoCombustible">
-                <option>Diésel</option><option>Etanol</option><option>Gasolina</option><option>Gas Natural</option><option>Fuel Oil</option><option>Carbón</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Cantidad de Combustible (galones)</label>
-              <input type="number" [(ngModel)]="formDatacombustibles.cantidadCombustible" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label>Poder Calorífico (kj/kg)</label>
-              <input type="number" [(ngModel)]="formDatacombustibles.poderCalorifico" placeholder="0.00">
             </div>
             <div class="form-group">
               <label>Cantidad Consumida (mes)</label>
-              <input type="number" [(ngModel)]="formDatacombustibles.cantidad" placeholder="0.00">
+              <input type="number" [(ngModel)]="formDatasuperficial.cantidad" placeholder="0">
             </div>
             <div class="form-group">
-              <label>Unidad kWh</label>
-              <input type="number" [(ngModel)]="formDatacombustibles.unidadKwh" placeholder="0.00">
+              <label>Cantidad (m³)</label>
+              <input type="number" [(ngModel)]="formDatasuperficial.unidad" placeholder="0">
             </div>
           </div>
-          <button class="btn-guardar" (click)="guardarCombustibles()">Guardar</button>
+          <button class="btn-guardar" (click)="guardarSuperficial()">Guardar</button>
         </div>
 
-        <!-- Biomasa eléctrica -->
-        <div class="form-section" *ngIf="tipoEnergia === 'biomasa_electrica'">
-          <div class="form-title">Biomasa para energía eléctrica</div>
+        <!-- Agua Lluvia -->
+        <div class="form-section" *ngIf="tipoFuente === 'lluvia'">
+          <div class="form-title">Agua Lluvia</div>
           <div class="form-grid">
             <div class="form-group">
               <label>Mes</label>
-              <select [(ngModel)]="formDatabiomasa_electrica.mes">
+              <select [(ngModel)]="formDatalluvia.mes">
                 <option>Enero</option><option>Febrero</option><option>Marzo</option>
                 <option>Abril</option><option>Mayo</option><option>Junio</option>
                 <option>Julio</option><option>Agosto</option><option>Septiembre</option>
@@ -227,43 +179,29 @@ interface EmpresaResumen {
             </div>
             <div class="form-group">
               <label>Año</label>
-              <select [(ngModel)]="formDatabiomasa_electrica.ano">
+              <select [(ngModel)]="formDatalluvia.ano">
                 <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
               </select>
-            </div>
-            <div class="form-group">
-              <label>Tipo de Biomasa</label>
-              <select [(ngModel)]="formDatabiomasa_electrica.tipoBiomasa">
-                <option>Cascarilla de Arroz</option><option>Corteza de Árbol</option><option>Residuos Agrícolas</option><option>Bagazo de Caña</option><option>Plásticos</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Cantidad de biomasa u otro material (kg)</label>
-              <input type="number" [(ngModel)]="formDatabiomasa_electrica.cantidad" placeholder="0.00">
-            </div>
-            <div class="form-group">
-              <label>Poder Calorífico (kj/kg)</label>
-              <input type="number" [(ngModel)]="formDatabiomasa_electrica.poderCalorifico" placeholder="0.00">
             </div>
             <div class="form-group">
               <label>Cantidad Consumida (mes)</label>
-              <input type="number" [(ngModel)]="formDatabiomasa_electrica.cantidadConsumidaMes" placeholder="0.00">
+              <input type="number" [(ngModel)]="formDatalluvia.cantidad" placeholder="0">
             </div>
             <div class="form-group">
-              <label>Unidad kWh</label>
-              <input type="number" [(ngModel)]="formDatabiomasa_electrica.unidadKwh" placeholder="0.00">
+              <label>Cantidad (m³)</label>
+              <input type="number" [(ngModel)]="formDatalluvia.unidad" placeholder="0">
             </div>
           </div>
-          <button class="btn-guardar" (click)="guardarBiomasaElectrica()">Guardar</button>
+          <button class="btn-guardar" (click)="guardarLluvia()">Guardar</button>
         </div>
 
-        <!-- Biomasa calor -->
-        <div class="form-section" *ngIf="tipoEnergia === 'biomasa_calor'">
-          <div class="form-title">Biomasa para generar calor</div>
+        <!-- Agua Reuso -->
+        <div class="form-section" *ngIf="tipoFuente === 'reuso'">
+          <div class="form-title">Agua Reuso</div>
           <div class="form-grid">
             <div class="form-group">
               <label>Mes</label>
-              <select [(ngModel)]="formDatabiomasa_calor.mes">
+              <select [(ngModel)]="formDatareuso.mes">
                 <option>Enero</option><option>Febrero</option><option>Marzo</option>
                 <option>Abril</option><option>Mayo</option><option>Junio</option>
                 <option>Julio</option><option>Agosto</option><option>Septiembre</option>
@@ -272,22 +210,123 @@ interface EmpresaResumen {
             </div>
             <div class="form-group">
               <label>Año</label>
-              <select [(ngModel)]="formDatabiomasa_calor.ano">
+              <select [(ngModel)]="formDatareuso.ano">
                 <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Unidad de medida m³</label>
-              <input type="number" [(ngModel)]="formDatabiomasa_calor.cantidad" placeholder="0.00">
+              <label>Fuente de donde Proveniene el Agua</label>
+              <input type="text" [(ngModel)]="formDatareuso.fuenteReuso" placeholder="Fuente de origen">
             </div>
             <div class="form-group">
-              <label>Tipo de Biomasa</label>
-              <select [(ngModel)]="formDatabiomasa_calor.tipoBiomasa">
-                <option>Cascarilla de Arroz</option><option>Corteza de Árbol</option><option>Residuos Agrícolas</option><option>Bagazo de Caña</option>
-              </select>
+              <label>Cantidad de Agua Consumida</label>
+              <input type="number" [(ngModel)]="formDatareuso.cantidad" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Unidad (m³)</label>
+              <input type="number" [(ngModel)]="formDatareuso.unidad" placeholder="0">
             </div>
           </div>
-          <button class="btn-guardar" (click)="guardarBiomasaCalor()">Guardar</button>
+          <button class="btn-guardar" (click)="guardarReuso()">Guardar</button>
+        </div>
+
+        <!-- Agua de Fuente Subterránea -->
+        <div class="form-section" *ngIf="tipoFuente === 'subterranea'">
+          <div class="form-title">Agua de Fuente Subterránea</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Mes</label>
+              <select [(ngModel)]="formDatasubterranea.mes">
+                <option>Enero</option><option>Febrero</option><option>Marzo</option>
+                <option>Abril</option><option>Mayo</option><option>Junio</option>
+                <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+                <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Año</label>
+              <select [(ngModel)]="formDatasubterranea.ano">
+                <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo</label>
+              <select [(ngModel)]="formDatasubterranea.tipoSubterranea">
+                <option>Aljibe</option><option>Manantial</option><option>Pozo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cantidad Consumida (mes)</label>
+              <input type="number" [(ngModel)]="formDatasubterranea.cantidad" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Cantidad (m³)</label>
+              <input type="number" [(ngModel)]="formDatasubterranea.unidad" placeholder="0">
+            </div>
+          </div>
+          <button class="btn-guardar" (click)="guardarSubterranea()">Guardar</button>
+        </div>
+
+        <!-- Agua de Distrito de Riego -->
+        <div class="form-section" *ngIf="tipoFuente === 'distrito_riego'">
+          <div class="form-title">Agua de Distrito de Riego</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Mes</label>
+              <select [(ngModel)]="formDatadistrito_riego.mes">
+                <option>Enero</option><option>Febrero</option><option>Marzo</option>
+                <option>Abril</option><option>Mayo</option><option>Junio</option>
+                <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+                <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Año</label>
+              <select [(ngModel)]="formDatadistrito_riego.ano">
+                <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cantidad Consumida (mes)</label>
+              <input type="number" [(ngModel)]="formDatadistrito_riego.cantidad" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Cantidad (m³)</label>
+              <input type="number" [(ngModel)]="formDatadistrito_riego.unidad" placeholder="0">
+            </div>
+          </div>
+          <button class="btn-guardar" (click)="guardarDistritoRiego()">Guardar</button>
+        </div>
+
+        <!-- Agua de Carrotanque -->
+        <div class="form-section" *ngIf="tipoFuente === 'carrotanque'">
+          <div class="form-title">Agua de Carrotanque</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Mes</label>
+              <select [(ngModel)]="formDatacarrotanque.mes">
+                <option>Enero</option><option>Febrero</option><option>Marzo</option>
+                <option>Abril</option><option>Mayo</option><option>Junio</option>
+                <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+                <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Año</label>
+              <select [(ngModel)]="formDatacarrotanque.ano">
+                <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cantidad Consumida (mes)</label>
+              <input type="number" [(ngModel)]="formDatacarrotanque.cantidad" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Cantidad (m³)</label>
+              <input type="number" [(ngModel)]="formDatacarrotanque.unidad" placeholder="0">
+            </div>
+          </div>
+          <button class="btn-guardar" (click)="guardarCarrotanque()">Guardar</button>
         </div>
       </div>
 
@@ -295,33 +334,29 @@ interface EmpresaResumen {
         <table class="tabla-datos">
           <thead>
             <tr>
-              <th>Tipo</th>
+              <th>Fuente de Captación</th>
               <th>Fecha</th>
               <th>Cantidad</th>
               <th>N° Meses</th>
               <th>Costo</th>
-              <th>Combustible</th>
-              <th>Cant. Comb.</th>
-              <th>P. Calorífico</th>
-              <th>Biomasa</th>
-              <th>Fuente</th>
+              <th>Tratamiento</th>
+              <th>Calidad</th>
+              <th>Volumen</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let reg of registros; trackBy: trackByRegistro">
-              <td>{{ getNombreTipo(reg.tipoEnergia) }}</td>
+              <td>{{ getNombreTipo(reg.tipoFuente) }}</td>
               <td>{{ reg.mes }} / {{ reg.ano }}</td>
               <td>{{ reg.cantidad || '-' }}</td>
               <td>{{ reg.numeroMeses || '-' }}</td>
               <td>{{ reg.costo ? '$' + reg.costo : '-' }}</td>
-              <td>{{ reg.tipoCombustible || '-' }}</td>
-              <td>{{ reg.cantidadCombustible || '-' }}</td>
-              <td>{{ reg.poderCalorifico || '-' }}</td>
-              <td>{{ reg.tipoBiomasa || '-' }}</td>
-              <td>{{ reg.tipoFuente || '-' }}</td>
+              <td>{{ reg.tipoTratamiento || '-' }}</td>
+              <td>{{ reg.calidadAgua || '-' }}</td>
+              <td>{{ reg.volumen || '-' }}</td>
             </tr>
             <tr *ngIf="registros.length === 0">
-              <td colspan="10" class="sin-datos">No hay registros de inventario</td>
+              <td colspan="8" class="sin-datos">No hay registros de inventario de agua</td>
             </tr>
           </tbody>
         </table>
@@ -332,7 +367,7 @@ interface EmpresaResumen {
     .contenido { display: flex; flex-direction: column; gap: 20px; }
     .tabla-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
     .tabla-datos { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .tabla-datos th { background: #4CAF50; color: white; padding: 12px; text-align: left; font-weight: 600; white-space: nowrap; }
+    .tabla-datos th { background: #2196F3; color: white; padding: 12px; text-align: left; font-weight: 600; white-space: nowrap; }
     .tabla-datos td { padding: 10px 12px; border-bottom: 1px solid #eee; color: #333; }
     .tabla-datos tr:hover { background: #f9f9f9; }
     .sin-datos { text-align: center; color: #999; padding: 20px; }
@@ -342,20 +377,20 @@ interface EmpresaResumen {
     .selector-empresa select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; min-width: 200px; }
     .filter-group { display: flex; align-items: center; gap: 8px; }
     .filter-group label { font-size: 14px; color: #666; }
-    .filter-select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white; min-width: 350px; }
+    .filter-select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white; min-width: 280px; }
     .form-section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .form-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #333; }
     .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 13px; color: #666; }
     .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: #4CAF50; }
-    .btn-guardar { background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 16px; }
-    .btn-guardar:hover { background: #45a049; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #2196F3; }
+    .btn-guardar { background: #2196F3; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 16px; }
+    .btn-guardar:hover { background: #1976D2; }
     
     .tabla-container h3 { margin: 0 0 16px; color: #333; }
     .empresa-cell { font-weight: 600; background: #f5f5f5; }
-    .first-row { border-top: 2px solid #4CAF50; }
+    .first-row { border-top: 2px solid #2196F3; }
     .sin-datos { text-align: center; color: #999; padding: 20px; }
     
     @media (max-width: 1024px) {
@@ -388,18 +423,20 @@ interface EmpresaResumen {
     }
   `]
 })
-export class InventarioComponent implements OnInit, OnDestroy {
-  tipoEnergia: string = 'electrica';
-  registros: RegistroInventarioLocal[] = [];
+export class InventarioAguaComponent implements OnInit, OnDestroy {
+  tipoFuente: string = 'acueducto';
+  registros: RegistroAgua[] = [];
   empresaId: number = 1;
   empresas: Empresa[] = [];
   registroExpandido: number | null = null;
 
-  formDataelectrica = { mes: 'Enero', ano: '2026', cantidad: 0, unidadKwh: 0, costo: 0 };
-  formDatarenovable = { mes: 'Enero', ano: '2026', cantidad: 0, tipoFuente: 'Solar', unidadKwh: 0 };
-  formDatacombustibles = { mes: 'Enero', ano: '2026', cantidad: 0, tipoCombustible: 'Diésil', cantidadCombustible: 0, poderCalorifico: 0, unidadKwh: 0 };
-  formDatabiomasa_electrica = { mes: 'Enero', ano: '2026', tipoBiomasa: 'Cascarilla de Arroz', poderCalorifico: 0, cantidad: 0, cantidadConsumidaMes: 0, unidadKwh: 0 };
-  formDatabiomasa_calor = { mes: 'Enero', ano: '2026', cantidad: 0, tipoBiomasa: 'Cascarilla de Arroz' };
+  formDataacueducto = { mes: 'Enero', ano: '2026', cantidad: 0, numeroMeses: 0, unidad: 0, costo: 0 };
+  formDatasuperficial = { mes: 'Enero', ano: '2026', cantidad: 0, numeroMeses: 0, unidad: 0, tipoFuente: 'Arroyo' };
+  formDatalluvia = { mes: 'Enero', ano: '2026', cantidad: 0, numeroMeses: 0, unidad: 0 };
+  formDatareuso = { mes: 'Enero', ano: '2026', cantidad: 0, unidad: 0, fuenteReuso: '' };
+  formDatasubterranea = { mes: 'Enero', ano: '2026', cantidad: 0, numeroMeses: 0, unidad: 0, tipoSubterranea: 'Aljibe' };
+  formDatadistrito_riego = { mes: 'Enero', ano: '2026', cantidad: 0, numeroMeses: 0, unidad: 0 };
+  formDatacarrotanque = { mes: 'Enero', ano: '2026', cantidad: 0, numeroMeses: 0, unidad: 0 };
 
   empresasResumen: EmpresaResumen[] = [];
 
@@ -411,6 +448,12 @@ export class InventarioComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
+
+  private tiposAgua = ['acueducto', 'superficial', 'lluvia', 'reuso', 'subterranea', 'distrito_riego', 'carrotanque'];
+
+  private isTipoAgua(tipo: string): boolean {
+    return this.tiposAgua.includes(tipo);
+  }
 
   ngOnInit() {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
@@ -438,6 +481,7 @@ export class InventarioComponent implements OnInit, OnDestroy {
       this.actualizarRegistros();
       this.cdr.markForCheck();
     });
+
     this.datosService.inventario$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.actualizarRegistros();
       this.actualizarResumen();
@@ -454,27 +498,27 @@ export class InventarioComponent implements OnInit, OnDestroy {
     return item.id;
   }
 
-  trackByRegistro(index: number, item: RegistroInventarioLocal): string {
-    return `${item.tipoEnergia}-${item.mes}-${item.ano}`;
+  trackByRegistro(index: number, item: RegistroAgua): string {
+    return `${item.tipoFuente}-${item.mes}-${item.ano}`;
   }
 
   actualizarResumen() {
     this.empresasResumen = this.empresas.map(emp => ({
       id: emp.id,
       nombre: emp.nombre,
-      registros: this.datosService.getInventarioPorEmpresa(emp.id).map(r => ({
-        tipoEnergia: r.tipoEnergia,
-        mes: r.mes,
-        ano: r.ano,
-        cantidad: r.cantidad,
-        numeroMeses: r.numeroMeses,
-        costo: r.costo,
-        tipoCombustible: r.tipoCombustible,
-        cantidadCombustible: r.cantidadCombustible,
-        poderCalorifico: r.poderCalorifico,
-        tipoBiomasa: r.tipoBiomasa,
-        tipoFuente: r.tipoFuente
-      }))
+      registros: this.datosService.getInventarioPorEmpresa(emp.id)
+        .filter(r => this.isTipoAgua(r.tipoEnergia))
+        .map(r => ({
+          tipoFuente: r.tipoEnergia,
+          mes: r.mes,
+          ano: r.ano,
+          cantidad: r.cantidad,
+          numeroMeses: r.numeroMeses,
+          costo: r.costo,
+          tipoTratamiento: r.tipoCombustible,
+          calidadAgua: r.tipoBiomasa,
+          volumen: r.poderCalorifico
+        }))
     }));
   }
 
@@ -484,43 +528,57 @@ export class InventarioComponent implements OnInit, OnDestroy {
   }
 
   actualizarRegistros() {
-    this.registros = this.datosService.getInventarioPorEmpresa(this.empresaId).map(r => ({
-      tipoEnergia: r.tipoEnergia,
-      mes: r.mes,
-      ano: r.ano,
-      cantidad: r.cantidad,
-      numeroMeses: r.numeroMeses,
-      costo: r.costo,
-      tipoCombustible: r.tipoCombustible,
-      cantidadCombustible: r.cantidadCombustible,
-      poderCalorifico: r.poderCalorifico,
-      tipoBiomasa: r.tipoBiomasa,
-      tipoFuente: r.tipoFuente
-    }));
+    let registrosRaw = this.datosService.getInventarioPorEmpresa(this.empresaId);
+    if (this.empresaId === 0) {
+      registrosRaw = this.datosService.getTodosInventario();
+    }
+    this.registros = registrosRaw
+      .filter(r => this.isTipoAgua(r.tipoEnergia))
+      .map(r => ({
+        tipoFuente: r.tipoEnergia,
+        mes: r.mes,
+        ano: r.ano,
+        cantidad: r.cantidad,
+        numeroMeses: r.numeroMeses,
+        costo: r.costo,
+        tipoTratamiento: r.tipoCombustible,
+        calidadAgua: r.tipoBiomasa,
+        volumen: r.poderCalorifico
+      }));
   }
 
-  guardarElectrica() {
-    const registro = { empresaId: this.empresaId, tipoEnergia: 'electrica', ...this.formDataelectrica };
+  guardarAcueducto() {
+    const registro = { empresaId: this.empresaId, tipoEnergia: 'acueducto', ...this.formDataacueducto };
     this.datosService.agregarInventario(registro);
   }
 
-  guardarRenovable() {
-    const registro = { empresaId: this.empresaId, tipoEnergia: 'renovable', ...this.formDatarenovable };
+  guardarSuperficial() {
+    const registro = { empresaId: this.empresaId, tipoEnergia: 'superficial', ...this.formDatasuperficial };
     this.datosService.agregarInventario(registro);
   }
 
-  guardarCombustibles() {
-    const registro = { empresaId: this.empresaId, tipoEnergia: 'combustibles', ...this.formDatacombustibles };
+  guardarLluvia() {
+    const registro = { empresaId: this.empresaId, tipoEnergia: 'lluvia', ...this.formDatalluvia };
     this.datosService.agregarInventario(registro);
   }
 
-  guardarBiomasaElectrica() {
-    const registro = { empresaId: this.empresaId, tipoEnergia: 'biomasa_electrica', ...this.formDatabiomasa_electrica };
+  guardarReuso() {
+    const registro = { empresaId: this.empresaId, tipoEnergia: 'reuso', ...this.formDatareuso };
     this.datosService.agregarInventario(registro);
   }
 
-  guardarBiomasaCalor() {
-    const registro = { empresaId: this.empresaId, tipoEnergia: 'biomasa_calor', ...this.formDatabiomasa_calor };
+  guardarSubterranea() {
+    const registro = { empresaId: this.empresaId, tipoEnergia: 'subterranea', ...this.formDatasubterranea };
+    this.datosService.agregarInventario(registro);
+  }
+
+  guardarDistritoRiego() {
+    const registro = { empresaId: this.empresaId, tipoEnergia: 'distrito_riego', ...this.formDatadistrito_riego };
+    this.datosService.agregarInventario(registro);
+  }
+
+  guardarCarrotanque() {
+    const registro = { empresaId: this.empresaId, tipoEnergia: 'carrotanque', ...this.formDatacarrotanque };
     this.datosService.agregarInventario(registro);
   }
 
@@ -534,11 +592,13 @@ export class InventarioComponent implements OnInit, OnDestroy {
 
   getNombreTipo(tipo: string): string {
     const tipos: { [key: string]: string } = {
-      'electrica': 'Energía eléctrica del servicio público',
-      'renovable': 'Energías renovables',
-      'combustibles': 'Energía a partir de combustibles',
-      'biomasa_electrica': 'Biomasa para energía eléctrica',
-      'biomasa_calor': 'Biomasa para generar calor'
+      'acueducto': 'Agua de Acueducto',
+      'superficial': 'Agua de Fuente Superficial',
+      'lluvia': 'Agua Lluvia',
+      'reuso': 'Agua Reuso',
+      'subterranea': 'Agua de Fuente Subterránea',
+      'distrito_riego': 'Agua de Distrito de Riego',
+      'carrotanque': 'Agua de Carrotanque'
     };
     return tipos[tipo] || tipo;
   }
