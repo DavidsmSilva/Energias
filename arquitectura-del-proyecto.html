@@ -11,7 +11,6 @@
       --primary-light: #4CAF50;
       --primary-dark: #1B5E20;
       --secondary: #1976D2;
-      --secondary-light: #42A5F5;
       --accent: #FF9800;
       --bg: #F5F7FA;
       --card-bg: #FFFFFF;
@@ -29,7 +28,6 @@
     }
     .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
     
-    /* Header */
     .header {
       background: linear-gradient(135deg, var(--primary-dark), var(--primary));
       color: white;
@@ -54,7 +52,6 @@
       margin-top: 15px;
     }
 
-    /* Section */
     .section {
       background: var(--card-bg);
       padding: 30px;
@@ -76,7 +73,6 @@
       font-size: 1.1rem;
     }
 
-    /* Tech Stack Grid */
     .tech-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -90,11 +86,6 @@
       background: linear-gradient(135deg, #f8f9fa, #fff);
       border-radius: 10px;
       border: 1px solid var(--border);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .tech-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     }
     .tech-icon {
       width: 45px;
@@ -107,14 +98,12 @@
     }
     .tech-icon.angular { background: #DD0031; color: white; }
     .tech-icon.typescript { background: #3178C6; color: white; }
-    .tech-icon.material { background: #673AB7; color: white; }
     .tech-icon.rxjs { background: #B7178C; color: white; }
     .tech-icon.node { background: #339933; color: white; }
     .tech-icon.html { background: #E34F26; color: white; }
     .tech-info h4 { margin: 0; font-size: 0.95rem; }
     .tech-info span { font-size: 0.8rem; color: var(--text-light); }
 
-    /* Architecture Diagram */
     .arch-diagram {
       background: #1E1E1E;
       color: #D4D4D4;
@@ -123,23 +112,9 @@
       font-family: 'Consolas', 'Monaco', monospace;
       font-size: 0.85rem;
       overflow-x: auto;
-    }
-    .arch-diagram .layer {
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 6px;
-    }
-    .arch-diagram .client { background: #264F78; }
-    .arch-diagram .angular { background: #C586C0; color: white; }
-    .arch-diagram .services { background: #4EC9B0; color: #1E1E1E; }
-    .arch-diagram .data { background: #CE9178; color: #1E1E1E; }
-    .arch-diagram .arrow { 
-      color: #6A9955; 
-      font-size: 1.2rem;
-      line-height: 1;
+      line-height: 1.8;
     }
 
-    /* Tree Structure */
     .tree {
       background: #FAFAFA;
       padding: 20px;
@@ -147,12 +122,11 @@
       font-family: 'Consolas', monospace;
       font-size: 0.85rem;
       border: 1px solid var(--border);
+      line-height: 1.8;
     }
-    .tree-line { color: var(--primary); }
-    .tree-folder { color: #FFA000; }
+    .tree-folder { color: #FFA000; font-weight: bold; }
     .tree-file { color: #1976D2; }
 
-    /* Component Cards */
     .component-flow {
       display: flex;
       flex-wrap: wrap;
@@ -173,7 +147,6 @@
     .flow-card h4 { margin-bottom: 10px; font-size: 1rem; }
     .flow-card ul { margin: 0; padding-left: 20px; font-size: 0.9rem; }
 
-    /* Route Table */
     .route-table {
       width: 100%;
       border-collapse: collapse;
@@ -198,7 +171,6 @@
       font-size: 0.9rem;
     }
 
-    /* Data Models */
     .models-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -214,9 +186,6 @@
     .model-card h4 {
       color: var(--primary);
       margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     .model-card .fields {
       display: flex;
@@ -231,7 +200,6 @@
       border: 1px solid var(--border);
     }
 
-    /* Feature Boxes */
     .feature {
       background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
       padding: 15px 20px;
@@ -243,8 +211,11 @@
       background: linear-gradient(135deg, #E3F2FD, #E8EAF6);
       border-left-color: var(--secondary);
     }
+    .feature.accent {
+      background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+      border-left-color: var(--accent);
+    }
 
-    /* Commands */
     .command-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -270,26 +241,6 @@
       font-size: 0.8rem;
     }
 
-    /* Stats */
-    .stats-row {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .stat-box {
-      flex: 1;
-      min-width: 150px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-light));
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    .stat-box .number { font-size: 2rem; font-weight: 700; }
-    .stat-box .label { opacity: 0.9; font-size: 0.9rem; }
-
-    /* Notes */
     .notes {
       background: #FFF8E1;
       border: 1px solid #FFE082;
@@ -301,7 +252,6 @@
     .notes ul { margin: 0; padding-left: 20px; }
     .notes li { font-size: 0.9rem; color: #5D4037; }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .header h1 { font-size: 1.8rem; }
       .tech-grid { grid-template-columns: 1fr; }
@@ -311,16 +261,15 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <header class="header">
-      <h1>⚡ Energia Inventory</h1>
+      <h1>Energia Inventory</h1>
       <p>Sistema de gestión de inventario y consumo energético para empresas</p>
-      <span class="badge">📊 v1.0.0</span>
+      <span class="badge">v0.1.0 | Angular 15 | Standalone</span>
     </header>
 
     <!-- Tech Stack -->
     <section class="section">
-      <h2>🛠️ Stack Tecnológico</h2>
+      <h2>Stack Tecnológico</h2>
       <div class="tech-grid">
         <div class="tech-card">
           <div class="tech-icon angular">A</div>
@@ -334,13 +283,6 @@
           <div class="tech-info">
             <h4>TypeScript</h4>
             <span>v4.8.4</span>
-          </div>
-        </div>
-        <div class="tech-card">
-          <div class="tech-icon material">M</div>
-          <div class="tech-info">
-            <h4>Angular Material</h4>
-            <span>v15.0.0</span>
           </div>
         </div>
         <div class="tech-card">
@@ -369,85 +311,164 @@
 
     <!-- Architecture Diagram -->
     <section class="section">
-      <h2>🏗️ Arquitectura del Sistema</h2>
+      <h2>Arquitectura del Sistema</h2>
       <div class="arch-diagram">
-┌─────────────────────────────────────────────────────────┐
-│                    CLIENTE (Browser)                     │
-│  ┌─────────────────────────────────────────────────┐    │
-│  │              Angular 15 (SPA)                    │    │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐          │    │
-│  │  │Components│  │Services │  │  Routes │          │    │
-│  │  └─────────┘  └─────────┘  └─────────┘          │    │
-│  └─────────────────────────────────────────────────┘    │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│                    DATOS (Local)                         │
-│  ┌─────────────────────────────────────────────────┐    │
-│  │    EmpresaService  │  DatosService              │    │
-│  │    (Empresas)      │  (Inventario/Consumo)      │    │
-│  └─────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────┘
+<pre>
+┌──────────────────────────────────────────────────────────────┐
+│                      main.ts (Bootstrap)                      │
+│  bootstrapApplication(AppComponent, {                        │
+│    provideRouter(routes),                                     │
+│    provideAnimations()                                        │
+│  })                                                           │
+└──────────────────────────┬───────────────────────────────────┘
+                           │
+                           ▼
+┌──────────────────────────────────────────────────────────────┐
+│                   AppComponent (Standalone)                   │
+│  - Menú lateral con empresas                                  │
+│  - HeaderComponent (barra superior)                           │
+│  - RouterOutlet (carga páginas)                               │
+│  - Navegación: Inicio, Energía, Agua, Ajustes                │
+└──────────────────────────┬───────────────────────────────────┘
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+   │  Sidebar     │  │   Pages     │  │  Services   │
+   │  Component   │  │  Components │  │             │
+   │  (navegación)│  │             │  │EmpresaService│
+   └─────────────┘  │- Dashboard  │  │DatosService  │
+                     │- Inicio     │  └──────────────┘
+                     │- Inventario │
+                     │- Consumo    │
+                     │- Inventario │
+                     │  Agua       │
+                     │- Ajustes    │
+                     └─────────────┘
+</pre>
       </div>
     </section>
 
     <!-- Project Structure -->
     <section class="section">
-      <h2>📁 Estructura del Proyecto</h2>
+      <h2>Estructura del Proyecto</h2>
       <div class="tree">
-<span class="tree-folder">📂 src/app/</span>
+<span class="tree-folder">src/app/</span>
 │
-<span class="tree-folder">📂 components/</span>      <span class="tree-file">→ Componentes reutilizables (header)</span>
+├── app.component.ts        <span class="tree-file">Componente raíz (standalone, bootstrap)</span>
+├── app.component.html      <span class="tree-file">Template: sidebar + header + router-outlet</span>
+├── app.component.css       <span class="tree-file">Estilos del layout principal</span>
+├── app.module.ts           <span class="tree-file">Módulo principal (no se usa como bootstrap)</span>
+├── app-routing.module.ts   <span class="tree-file">Configuración de rutas activas</span>
 │
-<span class="tree-folder">📂 pages/</span>          <span class="tree-file">→ Vistas principales</span>
-│   ├── dashboard/          <span class="tree-file">→ Energía (inicio)</span>
-│   ├── inventario/         <span class="tree-file">→ Gestión inventario</span>
-│   ├── consumo/            <span class="tree-file">→ Gestión consumo</span>
-│   └── ajustes/            <span class="tree-file">→ Configuración</span>
+├── <span class="tree-folder">components/</span>
+│   ├── header/             <span class="tree-file">HeaderComponent (standalone) - barra superior</span>
+│   └── sidebar/            <span class="tree-file">SidebarComponent (standalone) - menú lateral</span>
 │
-<span class="tree-folder">📂 services/</span>       <span class="tree-file">→ Lógica de negocio</span>
-│   ├── empresa.service.ts
-│   └── datos.service.ts
+├── <span class="tree-folder">pages/</span>
+│   ├── dashboard/          <span class="tree-file">DashboardComponent - panel empresas + inventario/consumo/agua</span>
+│   ├── inicio/             <span class="tree-file">InicioComponent - página de bienvenida</span>
+│   ├── empresas/           <span class="tree-file">EmpresasPageComponent - tabla de empresas</span>
+│   ├── inventario/         <span class="tree-file">InventarioComponent - formularios + tabla inventario</span>
+│   ├── consumo/            <span class="tree-file">ConsumoComponent - formularios + tabla consumo</span>
+│   ├── inventario-agua/    <span class="tree-file">InventarioAguaComponent - fuentes de agua</span>
+│   └── ajustes/            <span class="tree-file">AjustesComponent - configuración (placeholder)</span>
 │
-<span class="tree-folder">📂 models/</span>         <span class="tree-file">→ Definiciones de tipos</span>
+├── <span class="tree-folder">services/</span>
+│   ├── empresa.service.ts  <span class="tree-file">EmpresaService (providedIn: root) - gestión empresas</span>
+│   └── datos.service.ts    <span class="tree-file">DatosService (providedIn: root) - inventario y consumo</span>
 │
-<span class="tree-folder">📂 shared/</span>         <span class="tree-file">→ Componentes compartidos</span>
+└── <span class="tree-folder">models/</span>
+    └── empresa.model.ts    <span class="tree-file">Interface Empresa { id: string, nombre: string }</span>
       </div>
     </section>
 
-    <!-- Component Flow -->
+    <!-- Bootstrap Flow -->
     <section class="section">
-      <h2>🔄 Flujo de Componentes</h2>
+      <h2>Flujo de Arranque</h2>
+      <div class="feature">
+        <strong>main.ts:</strong> Usa <code>bootstrapApplication(AppComponent)</code> (standalone bootstrap).
+        Las rutas se configuran con <code>provideRouter(routes)</code> donde
+        <code>routes</code> se importa de <code>app-routing.module.ts</code>.
+      </div>
+      <div class="feature secondary">
+        <strong>AppComponent (standalone):</strong> Importa CommonModule, FormsModule, RouterModule y HeaderComponent.
+        Contiene el layout principal con sidebar, header y router-outlet.
+      </div>
+    </section>
+
+    <!-- Components -->
+    <section class="section">
+      <h2>Componentes</h2>
       <div class="component-flow">
-        <div class="flow-card header">
-          <h4>📱 HeaderComponent</h4>
-          <ul>
-            <li>Barra de encabezado</li>
-            <li>Título dinámico</li>
-          </ul>
-        </div>
         <div class="flow-card main">
-          <h4>⚡ AppComponent</h4>
+          <h4>AppComponent (Standalone)</h4>
           <ul>
-            <li>Componente raíz (standalone)</li>
-            <li>Menú lateral de navegación</li>
+            <li>Componente raíz bootstrappeado</li>
+            <li>Layout: sidebar + header + contenido</li>
+            <li>Menú de navegación (Inicio, Energía, Agua, Ajustes)</li>
+            <li>Título dinámico según ruta</li>
           </ul>
         </div>
-        <div class="flow-card pages">
-          <h4>📄 Page Components</h4>
+        <div class="flow-card header">
+          <h4>HeaderComponent (Standalone)</h4>
           <ul>
-            <li>Dashboard (energía)</li>
-            <li>Inventario</li>
-            <li>Consumo</li>
-            <li>Ajustes</li>
+            <li>Barra superior verde</li>
+            <li>Recibe @Input pageTitle</li>
           </ul>
         </div>
         <div class="flow-card services">
-          <h4>🔌 Services</h4>
+          <h4>SidebarComponent (Standalone)</h4>
           <ul>
-            <li>EmpresaService</li>
-            <li>DatosService</li>
+            <li>Menú lateral con navegación</li>
+            <li>Sección Energía con subempresas</li>
+            <li>Sección Agua con subempresas</li>
+            <li>Dropdown por empresa</li>
+          </ul>
+        </div>
+      </div>
+      <div class="component-flow">
+        <div class="flow-card pages">
+          <h4>DashboardComponent</h4>
+          <ul>
+            <li>Panel de empresas (crear, listar, filtrar)</li>
+            <li>Resumen con tarjetas por empresa</li>
+            <li>Tabs Inventario / Consumo</li>
+            <li>Modal de detalle por registro</li>
+            <li>Soporte modo Agua (esAgua)</li>
+          </ul>
+        </div>
+        <div class="flow-card pages">
+          <h4>InventarioComponent</h4>
+          <ul>
+            <li>Sin empresaId: tabla todas las empresas</li>
+            <li>Con empresaId: formulario + tabla</li>
+            <li>5 tipos: electrica, renovable, combustibles, biomasa_electrica, biomasa_calor</li>
+          </ul>
+        </div>
+        <div class="flow-card pages">
+          <h4>ConsumoComponent</h4>
+          <ul>
+            <li>Sin empresaId: tabla todas las empresas</li>
+            <li>Con empresaId: formulario + tabla</li>
+            <li>5 tipos: gas_electrica, gas_calor, vendida, recibida, cedida</li>
+          </ul>
+        </div>
+      </div>
+      <div class="component-flow">
+        <div class="flow-card pages">
+          <h4>InventarioAguaComponent</h4>
+          <ul>
+            <li>7 tipos: acueducto, superficial, lluvia, reuso, subterranea, distrito_riego, carrotanque</li>
+            <li>Formulario + tabla por empresa</li>
+          </ul>
+        </div>
+        <div class="flow-card pages">
+          <h4>Otros</h4>
+          <ul>
+            <li>InicioComponent: bienvenida simple</li>
+            <li>EmpresasPageComponent: tabla empresas</li>
+            <li>AjustesComponent: placeholder vacío</li>
           </ul>
         </div>
       </div>
@@ -455,7 +476,7 @@
 
     <!-- Routes -->
     <section class="section">
-      <h2>🛤️ Rutas de Navegación</h2>
+      <h2>Rutas de Navegación</h2>
       <table class="route-table">
         <thead>
           <tr>
@@ -467,33 +488,53 @@
         <tbody>
           <tr>
             <td><code>/</code></td>
-            <td>Dashboard</td>
-            <td>Inicio - Panel de empresas y resumen</td>
+            <td>DashboardComponent</td>
+            <td>Panel principal empresas, inventario y consumo</td>
+          </tr>
+          <tr>
+            <td><code>/inicio</code></td>
+            <td>InicioComponent</td>
+            <td>Página de bienvenida</td>
           </tr>
           <tr>
             <td><code>/inventario</code></td>
-            <td>Inventario</td>
+            <td>InventarioComponent</td>
             <td>Inventario de todas las empresas</td>
           </tr>
           <tr>
-            <td><code>/inventario/:id</code></td>
-            <td>Inventario</td>
-            <td>Inventario de empresa específica</td>
+            <td><code>/inventario/:empresaId</code></td>
+            <td>InventarioComponent</td>
+            <td>Inventario empresa específica</td>
           </tr>
           <tr>
             <td><code>/consumo</code></td>
-            <td>Consumo</td>
+            <td>ConsumoComponent</td>
             <td>Consumo de todas las empresas</td>
           </tr>
           <tr>
-            <td><code>/consumo/:id</code></td>
-            <td>Consumo</td>
-            <td>Consumo de empresa específica</td>
+            <td><code>/consumo/:empresaId</code></td>
+            <td>ConsumoComponent</td>
+            <td>Consumo empresa específica</td>
+          </tr>
+          <tr>
+            <td><code>/agua</code></td>
+            <td>DashboardComponent</td>
+            <td>Panel de fuentes de agua</td>
+          </tr>
+          <tr>
+            <td><code>/agua/:empresaId</code></td>
+            <td>InventarioAguaComponent</td>
+            <td>Fuentes de agua por empresa</td>
           </tr>
           <tr>
             <td><code>/ajustes</code></td>
-            <td>Ajustes</td>
-            <td>Configuración del sistema</td>
+            <td>AjustesComponent</td>
+            <td>Configuración (placeholder)</td>
+          </tr>
+          <tr>
+            <td><code>**</code></td>
+            <td>Redirect</td>
+            <td>Redirige a /</td>
           </tr>
         </tbody>
       </table>
@@ -501,75 +542,118 @@
 
     <!-- Data Models -->
     <section class="section">
-      <h2>💾 Modelos de Datos</h2>
+      <h2>Modelos de Datos</h2>
       <div class="models-grid">
         <div class="model-card">
-          <h4>🏢 Empresa</h4>
+          <h4>Empresa (empresa.model.ts)</h4>
           <div class="fields">
-            <span class="field-tag">id: number</span>
+            <span class="field-tag">id: string</span>
             <span class="field-tag">nombre: string</span>
           </div>
         </div>
         <div class="model-card">
-          <h4>📦 RegistroInventario</h4>
+          <h4>RegistroInventario (datos.service.ts)</h4>
           <div class="fields">
-            <span class="field-tag">electrica</span>
-            <span class="field-tag">renovable</span>
-            <span class="field-tag">combustibles</span>
-            <span class="field-tag">biomasa_electrica</span>
-            <span class="field-tag">biomasa_calor</span>
+            <span class="field-tag">empresaId: number</span>
+            <span class="field-tag">tipoEnergia: string</span>
+            <span class="field-tag">mes: string</span>
+            <span class="field-tag">ano: string</span>
+            <span class="field-tag">cantidad?: number</span>
+            <span class="field-tag">numeroMeses?: number</span>
+            <span class="field-tag">costo?: number</span>
+            <span class="field-tag">tipoCombustible?: string</span>
+            <span class="field-tag">cantidadCombustible?: number</span>
+            <span class="field-tag">poderCalorifico?: number</span>
+            <span class="field-tag">tipoBiomasa?: string</span>
+            <span class="field-tag">tipoFuente?: string</span>
           </div>
         </div>
         <div class="model-card">
-          <h4>⚡ RegistroConsumo</h4>
+          <h4>RegistroConsumo (datos.service.ts)</h4>
           <div class="fields">
-            <span class="field-tag">gas_electrica</span>
-            <span class="field-tag">gas_calor</span>
-            <span class="field-tag">vendida</span>
-            <span class="field-tag">recibida</span>
-            <span class="field-tag">cedida</span>
+            <span class="field-tag">empresaId: number</span>
+            <span class="field-tag">tipoEnergia: string</span>
+            <span class="field-tag">mes: string</span>
+            <span class="field-tag">ano: string</span>
+            <span class="field-tag">cantidad?: number</span>
+            <span class="field-tag">tipoGas?: string</span>
+            <span class="field-tag">cantidadGas?: number</span>
+            <span class="field-tag">poderCalorifico?: number</span>
+            <span class="field-tag">unidadKwh?: number</span>
           </div>
         </div>
       </div>
+      <h3>Tipos de Energía - Inventario</h3>
+      <div class="feature">
+        <ul>
+          <li><strong>electrica:</strong> Energía eléctrica del servicio público</li>
+          <li><strong>renovable:</strong> Energías renovables (Solar, Eólica, Hidráulica, Geotérmica)</li>
+          <li><strong>combustibles:</strong> Energía a partir de combustibles (Diésel, Etanol, Gasolina, etc.)</li>
+          <li><strong>biomasa_electrica:</strong> Biomasa para energía eléctrica</li>
+          <li><strong>biomasa_calor:</strong> Biomasa para generar calor</li>
+        </ul>
+      </div>
+      <h3>Tipos de Energía - Consumo</h3>
+      <div class="feature secondary">
+        <ul>
+          <li><strong>gas_electrica:</strong> Gas para energía eléctrica</li>
+          <li><strong>gas_calor:</strong> Gas para generar calor</li>
+          <li><strong>vendida:</strong> Energía Vendida (kWh)</li>
+          <li><strong>recibida:</strong> Energía Recibida (kWh)</li>
+          <li><strong>cedida:</strong> Energía Cedida en Transferencia (kWh)</li>
+        </ul>
+      </div>
+      <h3>Fuentes de Agua</h3>
+      <div class="feature accent">
+        <ul>
+          <li><strong>acueducto:</strong> Agua de Acueducto</li>
+          <li><strong>superficial:</strong> Agua de Fuente Superficial (Arroyo, Canal, Caño, Cienaga, Embalse, Estuario)</li>
+          <li><strong>lluvia:</strong> Agua Lluvia</li>
+          <li><strong>reuso:</strong> Agua Reuso (con fuente de origen)</li>
+          <li><strong>subterranea:</strong> Agua de Fuente Subterránea (Aljibe, Manantial, Pozo)</li>
+          <li><strong>distrito_riego:</strong> Agua de Distrito de Riego</li>
+          <li><strong>carrotanque:</strong> Agua de Carrotanque</li>
+        </ul>
+      </div>
     </section>
 
-    <!-- Features -->
+    <!-- Services -->
     <section class="section">
-      <h2>✨ Características Principales</h2>
-      
-      <h3>📊 Dashboard (Energía)</h3>
-      <div class="feature">
-        <strong>Panel de Empresas:</strong>
-        <ul>
-          <li>Encabezado verde con título "Empresas" y botón "+" para agregar</li>
-          <li>Formulario para crear empresa (solo nombre)</li>
-          <li>Lista de empresas con icono, nombre y menú de opciones</li>
-          <li>Dropdown con opciones: Inventario, Consumo</li>
-        </ul>
-      </div>
-      <div class="feature secondary">
-        <strong>Resumen de Empresas:</strong>
-        <ul>
-          <li>Tarjetas con contadores de cada empresa</li>
-          <li>Al hacer clic: filtra tablas y muestra tabs Inventario/Consumo</li>
-          <li>Filtro por tipo de energía específico</li>
-          <li>Modal de detalle con campos existentes</li>
-        </ul>
-      </div>
-
-      <h3>📈 Inventario y Consumo</h3>
-      <div class="feature">
-        <ul>
-          <li><strong>Sin empresa:</strong> Tabla con todos los registros</li>
-          <li><strong>Con empresa:</strong> Formulario + tabla específica</li>
-          <li>Inventario: tabla verde | Consumo: tabla azul</li>
-        </ul>
+      <h2>Servicios</h2>
+      <div class="models-grid">
+        <div class="model-card">
+          <h4>EmpresaService</h4>
+          <div class="fields">
+            <span class="field-tag">providedIn: root</span>
+            <span class="field-tag">empresaId$: BehaviorSubject</span>
+            <span class="field-tag">empresas$: BehaviorSubject</span>
+            <span class="field-tag">setEmpresa(id)</span>
+            <span class="field-tag">getEmpresaId()</span>
+            <span class="field-tag">getNombreEmpresa(id)</span>
+            <span class="field-tag">getEmpresas()</span>
+            <span class="field-tag">agregarEmpresa(id, nombre)</span>
+          </div>
+        </div>
+        <div class="model-card">
+          <h4>DatosService</h4>
+          <div class="fields">
+            <span class="field-tag">providedIn: root</span>
+            <span class="field-tag">inventario$: BehaviorSubject</span>
+            <span class="field-tag">consumo$: BehaviorSubject</span>
+            <span class="field-tag">agregarInventario(reg)</span>
+            <span class="field-tag">agregarConsumo(reg)</span>
+            <span class="field-tag">getInventarioPorEmpresa(id)</span>
+            <span class="field-tag">getConsumoPorEmpresa(id)</span>
+            <span class="field-tag">eliminarInventario(id, index)</span>
+            <span class="field-tag">eliminarConsumo(id, index)</span>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Commands -->
     <section class="section">
-      <h2>🚀 Comandos</h2>
+      <h2>Comandos</h2>
       <div class="command-grid">
         <div class="command-item">
           <code>npm install</code>
@@ -587,24 +671,21 @@
           <code>ng test</code>
           <span class="desc">Ejecutar pruebas</span>
         </div>
-        <div class="command-item">
-          <code>ng lint</code>
-          <span class="desc">Verificar código</span>
-        </div>
       </div>
     </section>
 
     <!-- Notes -->
     <section class="section">
       <div class="notes">
-        <h4>📝 Notas del Desarrollador</h4>
+        <h4>Notas</h4>
         <ul>
+          <li>Bootstrap: <code>bootstrapApplication(AppComponent)</code> en main.ts</li>
           <li>AppComponent es <strong>standalone</strong> (Angular 15+)</li>
-          <li>Los filtros de tipo no tienen opción "Todos"</li>
-          <li>Panel de empresas integrado en Dashboard</li>
-          <li>Los modales muestran solo campos con valor</li>
-          <li>Uso de <strong>RxJS</strong> para manejo reactivo de datos</li>
-          <li><strong>Angular Material</strong> para componentes UI</li>
+          <li>DashboardComponent se reutiliza para / y /agua (con flag esAgua)</li>
+          <li>Todos los servicios usan <code>providedIn: 'root'</code></li>
+          <li>7 páginas en <code>pages/</code></li>
+          <li>ChangeDetection.OnPush en todos los componentes de página</li>
+          <li>Estado local con BehaviorSubject (sin persistencia)</li>
         </ul>
       </div>
     </section>

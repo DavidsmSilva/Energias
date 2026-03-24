@@ -1,8 +1,0 @@
-.left-panel { width: 420px; padding: 16px; }
-.empresas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 12px; background: #f3f4f6; border-radius: 8px; }
-.empresas-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: #374151; }
-.empresas-icon { font-size: 28px; width: 28px; height: 28px; }
-.title { font-weight: 800; font-size: 64px; text-transform: uppercase; color: #374151; }
-.empresa-list { display: flex; flex-direction: column; gap: 12px; }
-.empresa-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; }
-.empresa-name { font-weight: 600; }
